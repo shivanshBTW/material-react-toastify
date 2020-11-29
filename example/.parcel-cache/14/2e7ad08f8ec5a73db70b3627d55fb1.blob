@@ -1,0 +1,35 @@
+"use strict";
+
+var helpers = require("../../node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+
+try {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.useKeeper = useKeeper;
+
+  var _react = require("react");
+
+  /**
+   * `useKeeper` is a helper around `useRef`.
+   *
+   * You don't need to access the `.current`property to get the value
+   * If refresh is set to true. The ref will be updated every render
+   */
+  function useKeeper(arg, refresh = false) {
+    const ref = (0, _react.useRef)(arg);
+    (0, _react.useEffect)(() => {
+      if (refresh) ref.current = arg;
+    });
+    return ref.current;
+  }
+
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}

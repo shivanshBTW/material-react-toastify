@@ -1,0 +1,27 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.collapseToast = collapseToast;
+
+var _constant = require("./constant");
+
+/**
+ * Used to collapse toast after exit animation
+ */
+function collapseToast(node, done, duration = _constant.DEFAULT.COLLAPSE_DURATION) {
+  const height = node.scrollHeight;
+  const style = node.style;
+  requestAnimationFrame(() => {
+    style.minHeight = 'initial';
+    style.height = height + 'px';
+    style.transition = `all ${duration}ms`;
+    requestAnimationFrame(() => {
+      style.height = '0';
+      style.padding = '0';
+      style.margin = '0';
+      setTimeout(() => done(), duration);
+    });
+  });
+}

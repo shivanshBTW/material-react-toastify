@@ -1,0 +1,32 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Flip = exports.Zoom = exports.Slide = exports.Bounce = void 0;
+
+var _utils = require("../utils");
+
+const Bounce = (0, _utils.cssTransition)({
+  enter: `${_utils.DEFAULT.CSS_NAMESPACE}__bounce-enter`,
+  exit: `${_utils.DEFAULT.CSS_NAMESPACE}__bounce-exit`,
+  appendPosition: true
+});
+exports.Bounce = Bounce;
+const Slide = (0, _utils.cssTransition)({
+  enter: `${_utils.DEFAULT.CSS_NAMESPACE}__slide-enter`,
+  exit: `${_utils.DEFAULT.CSS_NAMESPACE}__slide-exit`,
+  duration: [450, 750],
+  appendPosition: true
+});
+exports.Slide = Slide;
+const Zoom = (0, _utils.cssTransition)({
+  enter: `${_utils.DEFAULT.CSS_NAMESPACE}__zoom-enter`,
+  exit: `${_utils.DEFAULT.CSS_NAMESPACE}__zoom-exit`
+});
+exports.Zoom = Zoom;
+const Flip = (0, _utils.cssTransition)({
+  enter: `${_utils.DEFAULT.CSS_NAMESPACE}__flip-enter`,
+  exit: `${_utils.DEFAULT.CSS_NAMESPACE}__flip-exit`
+});
+exports.Flip = Flip;

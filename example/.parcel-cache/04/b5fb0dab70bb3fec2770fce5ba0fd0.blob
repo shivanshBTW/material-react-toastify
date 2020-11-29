@@ -1,0 +1,161 @@
+"use strict";
+
+var helpers = require("../../node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+
+try {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.ToastContainer = void 0;
+
+  var React = _interopRequireWildcard(require("react"));
+
+  var _propTypes = _interopRequireDefault(require("prop-types"));
+
+  var _clsx = _interopRequireDefault(require("clsx"));
+
+  var _Toast = require("./Toast");
+
+  var _CloseButton = require("./CloseButton");
+
+  var _Transitions = require("./Transitions");
+
+  var _utils = require("../utils");
+
+  var _hooks = require("../hooks");
+
+  var _ToastPositioner = require("./ToastPositioner");
+
+  var _jsxFileName = "C:\\Users\\Shivansh\\Codebase\\material-react-toastify\\src\\components\\ToastContainer.tsx";
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+  function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+  const ToastContainer = props => {
+    const {
+      getToastToRender,
+      containerRef,
+      isToastActive
+    } = (0, _hooks.useToastContainer)(props);
+    const {
+      className,
+      style,
+      rtl,
+      containerId
+    } = props;
+    return /*#__PURE__*/React.createElement("div", {
+      ref: containerRef,
+      className: _utils.DEFAULT.CSS_NAMESPACE,
+      id: containerId,
+      __self: void 0,
+      __source: {
+        fileName: _jsxFileName,
+        lineNumber: 26,
+        columnNumber: 5
+      }
+    }, getToastToRender((position, toastList) => {
+      const swag = {
+        className: (0, _utils.isFn)(className) ? className({
+          position,
+          rtl,
+          defaultClassName: (0, _clsx.default)(`${_utils.DEFAULT.CSS_NAMESPACE}__toast-container`, `${_utils.DEFAULT.CSS_NAMESPACE}__toast-container--${position}`, {
+            [`${_utils.DEFAULT.CSS_NAMESPACE}__toast-container--rtl`]: rtl
+          })
+        }) : (0, _clsx.default)(`${_utils.DEFAULT.CSS_NAMESPACE}__toast-container`, `${_utils.DEFAULT.CSS_NAMESPACE}__toast-container--${position}`, {
+          [`${_utils.DEFAULT.CSS_NAMESPACE}__toast-container--rtl`]: rtl
+        }, (0, _utils.parseClassName)(className)),
+        style: toastList.length === 0 ? { ...style,
+          pointerEvents: 'none'
+        } : { ...style
+        }
+      };
+      return /*#__PURE__*/React.createElement(_ToastPositioner.ToastPositioner, _extends({}, swag, {
+        key: `container-${position}`,
+        __self: void 0,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 55,
+          columnNumber: 11
+        }
+      }), toastList.map(({
+        content,
+        props: toastProps
+      }) => {
+        return /*#__PURE__*/React.createElement(_Toast.Toast, _extends({}, toastProps, {
+          in: isToastActive(toastProps.toastId),
+          key: `toast-${toastProps.key}`,
+          closeButton: toastProps.closeButton === true ? _CloseButton.CloseButton : toastProps.closeButton,
+          __self: void 0,
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 58,
+            columnNumber: 17
+          }
+        }), content);
+      }));
+    }));
+  };
+
+  exports.ToastContainer = ToastContainer;
+
+  if ("development" !== 'production') {
+    // @ts-ignore
+    ToastContainer.propTypes = {
+      // @ts-ignore
+      position: _propTypes.default.oneOf((0, _utils.objectValues)(_utils.POSITION)),
+      // @ts-ignore
+      autoClose: _propTypes.default.oneOfType([_propTypes.default.bool, _propTypes.default.number]),
+      // @ts-ignore
+      closeButton: _propTypes.default.oneOfType([_propTypes.default.node, _propTypes.default.bool, _propTypes.default.func]),
+      hideProgressBar: _propTypes.default.bool,
+      pauseOnHover: _propTypes.default.bool,
+      closeOnClick: _propTypes.default.bool,
+      newestOnTop: _propTypes.default.bool,
+      className: _propTypes.default.any,
+      //oneOfType([PropTypes.func, PropTypes.string]),
+      style: _propTypes.default.object,
+      toastClassName: _propTypes.default.oneOfType([_propTypes.default.func, _propTypes.default.string]),
+      bodyClassName: _propTypes.default.oneOfType([_propTypes.default.func, _propTypes.default.string]),
+      progressClassName: _propTypes.default.oneOfType([_propTypes.default.func, _propTypes.default.string]),
+      progressStyle: _propTypes.default.object,
+      transition: _propTypes.default.func,
+      rtl: _propTypes.default.bool,
+      draggable: _propTypes.default.bool,
+      draggablePercent: _propTypes.default.number,
+      pauseOnFocusLoss: _propTypes.default.bool,
+      enableMultiContainer: _propTypes.default.bool,
+      containerId: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number]),
+      role: _propTypes.default.string,
+      onClick: _propTypes.default.func
+    };
+  }
+
+  ToastContainer.defaultProps = {
+    position: _utils.POSITION.BOTTOM_LEFT,
+    transition: _Transitions.Slide,
+    rtl: false,
+    autoClose: 3000,
+    hideProgressBar: true,
+    closeButton: _CloseButton.CloseButton,
+    pauseOnHover: true,
+    pauseOnFocusLoss: true,
+    closeOnClick: true,
+    newestOnTop: false,
+    draggable: true,
+    draggablePercent: 40,
+    role: 'alert'
+  };
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}

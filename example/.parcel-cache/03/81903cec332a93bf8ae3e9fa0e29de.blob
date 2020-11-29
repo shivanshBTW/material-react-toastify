@@ -1,0 +1,209 @@
+"use strict";
+
+var helpers = require("../../node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+
+try {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.ToastCode = void 0;
+
+  var React = _interopRequireWildcard(require("react"));
+
+  var _jsxFileName = "C:\\Users\\Shivansh\\Codebase\\material-react-toastify\\example\\components\\ToastCode.tsx";
+
+  function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+  function getType(type) {
+    switch (type) {
+      case 'default':
+      default:
+        return 'toast';
+
+      case 'success':
+        return 'toast.success';
+
+      case 'error':
+        return 'toast.error';
+
+      case 'info':
+        return 'toast.info';
+
+      case 'warning':
+        return 'toast.warn';
+    }
+  }
+
+  const ToastCode = ({
+    position,
+    disableAutoClose,
+    autoClose,
+    hideProgressBar,
+    closeOnClick,
+    pauseOnHover,
+    type,
+    draggable,
+    progress
+  }) => /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 42,
+      columnNumber: 3
+    }
+  }, /*#__PURE__*/React.createElement("h3", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 43,
+      columnNumber: 5
+    }
+  }, "Toast Emitter"), /*#__PURE__*/React.createElement("div", {
+    className: "code",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 44,
+      columnNumber: 5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 45,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__component",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 46,
+      columnNumber: 9
+    }
+  }, getType(type)), `('🦄 Wow so easy!', { `), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 49,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 50,
+      columnNumber: 9
+    }
+  }, "position"), `: "${position}"`, ","), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 53,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 54,
+      columnNumber: 9
+    }
+  }, "autoClose"), `: ${disableAutoClose ? false : autoClose}`, ","), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 57,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 58,
+      columnNumber: 9
+    }
+  }, "hideProgressBar"), `: ${hideProgressBar ? 'true' : 'false'}`, ","), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 61,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 62,
+      columnNumber: 9
+    }
+  }, "closeOnClick"), `: ${closeOnClick ? 'true' : 'false'}`, ","), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 65,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 66,
+      columnNumber: 9
+    }
+  }, "pauseOnHover"), `: ${pauseOnHover ? 'true' : 'false'}`, ","), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 69,
+      columnNumber: 7
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 70,
+      columnNumber: 9
+    }
+  }, "draggable"), `: ${draggable ? 'true' : 'false'}`, ","), !Number.isNaN(progress) && /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 74,
+      columnNumber: 9
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "code__props",
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 75,
+      columnNumber: 11
+    }
+  }, "progress"), `: ${progress}`, ","), /*#__PURE__*/React.createElement("div", {
+    __self: void 0,
+    __source: {
+      fileName: _jsxFileName,
+      lineNumber: 79,
+      columnNumber: 7
+    }
+  }, `});`)));
+
+  exports.ToastCode = ToastCode;
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}

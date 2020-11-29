@@ -1,0 +1,32 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DEFAULT = exports.TYPE = exports.POSITION = void 0;
+const POSITION = {
+  TOP_LEFT: 'top-left',
+  TOP_RIGHT: 'top-right',
+  TOP_CENTER: 'top-center',
+  BOTTOM_LEFT: 'bottom-left',
+  BOTTOM_RIGHT: 'bottom-right',
+  BOTTOM_CENTER: 'bottom-center'
+};
+exports.POSITION = POSITION;
+const TYPE = {
+  INFO: 'info',
+  SUCCESS: 'success',
+  WARNING: 'warning',
+  ERROR: 'error',
+  DEFAULT: 'default',
+  DARK: 'dark'
+};
+exports.TYPE = TYPE;
+let DEFAULT;
+exports.DEFAULT = DEFAULT;
+
+(function (DEFAULT) {
+  DEFAULT[DEFAULT["COLLAPSE_DURATION"] = 300] = "COLLAPSE_DURATION";
+  DEFAULT[DEFAULT["DEBOUNCE_DURATION"] = 50] = "DEBOUNCE_DURATION";
+  DEFAULT["CSS_NAMESPACE"] = "Toastify";
+})(DEFAULT || (exports.DEFAULT = DEFAULT = {}));

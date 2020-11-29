@@ -1,0 +1,518 @@
+"use strict";
+
+var helpers = require("../../node_modules/@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+
+var prevRefreshReg = window.$RefreshReg$;
+var prevRefreshSig = window.$RefreshSig$;
+helpers.prelude(module);
+
+try {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.App = void 0;
+
+  var React = _interopRequireWildcard(require("react"));
+
+  var _Header = require("./Header");
+
+  var _Radio = require("./Radio");
+
+  var _Checkbox = require("./Checkbox");
+
+  var _ContainerCode = require("./ContainerCode");
+
+  var _ToastCode = require("./ToastCode");
+
+  var _index = require("../../src/index");
+
+  require("../../scss/main.scss");
+
+  var _jsxFileName = "C:\\Users\\Shivansh\\Codebase\\material-react-toastify\\example\\components\\App.tsx";
+
+  function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+  function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+  function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+  // Attach to window. Can be useful to debug
+  // @ts-ignore
+  window.toast = _index.toast;
+  const flags = [{
+    id: 'disableAutoClose',
+    label: 'Disable auto-close'
+  }, {
+    id: 'hideProgressBar',
+    label: 'Hide progress bar(less fanciness!)'
+  }, {
+    id: 'newestOnTop',
+    label: 'Newest on top*'
+  }, {
+    id: 'closeOnClick',
+    label: 'Close on click'
+  }, {
+    id: 'pauseOnHover',
+    label: 'Pause delay on hover'
+  }, {
+    id: 'pauseOnFocusLoss',
+    label: 'Pause toast when the window loses focus'
+  }, {
+    id: 'rtl',
+    label: 'Right to left layout*'
+  }, {
+    id: 'draggable',
+    label: 'Allow to drag and close the toast'
+  }];
+  const transitions = {
+    bounce: _index.Bounce,
+    slide: _index.Slide,
+    zoom: _index.Zoom,
+    flip: _index.Flip
+  };
+
+  class App extends React.Component {
+    constructor(...args) {
+      super(...args);
+
+      _defineProperty(this, "state", App.getDefaultState());
+
+      _defineProperty(this, "handleReset", () => this.setState({ ...App.getDefaultState()
+      }));
+
+      _defineProperty(this, "clearAll", () => _index.toast.dismiss());
+
+      _defineProperty(this, "showToast", () => {
+        this.toastId = this.state.type === 'default' ? (0, _index.toast)('🦄 Wow so easy !', {
+          progress: this.state.progress
+        }) : _index.toast[this.state.type]('🚀 Wow so easy !', {
+          progress: this.state.progress
+        });
+      });
+
+      _defineProperty(this, "updateToast", () => _index.toast.update(this.toastId, {
+        progress: this.state.progress
+      }));
+
+      _defineProperty(this, "handleAutoCloseDelay", e => this.setState({
+        autoClose: e.target.value > 0 ? parseInt(e.target.value, 10) : 1
+      }));
+
+      _defineProperty(this, "handleRadioOrSelect", e => this.setState({
+        [e.target.name]: e.target.name === 'limit' ? parseInt(e.target.value, 10) : e.target.value
+      }));
+
+      _defineProperty(this, "toggleCheckbox", e => this.setState({
+        [e.target.name]: !this.state[e.target.name]
+      }));
+    }
+
+    static getDefaultState() {
+      return { ..._index.ToastContainer.defaultProps,
+        transition: 'bounce',
+        type: 'default',
+        progress: '',
+        disableAutoClose: false,
+        limit: 0
+      };
+    }
+
+    isDefaultProps() {
+      return this.state.position === 'top-right' && this.state.autoClose === 5000 && !this.state.disableAutoClose && !this.state.hideProgressBar && !this.state.newestOnTop && !this.state.rtl && this.state.pauseOnFocusLoss && this.state.pauseOnHover && this.state.closeOnClick && this.state.draggable;
+    }
+
+    renderFlags() {
+      return flags.map(({
+        id,
+        label
+      }) => /*#__PURE__*/React.createElement("li", {
+        key: id,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 127,
+          columnNumber: 7
+        }
+      }, /*#__PURE__*/React.createElement(_Checkbox.Checkbox, {
+        id: id,
+        label: label,
+        onChange: this.toggleCheckbox,
+        checked: this.state[id],
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 128,
+          columnNumber: 9
+        }
+      })));
+    }
+
+    render() {
+      return /*#__PURE__*/React.createElement("main", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 140,
+          columnNumber: 7
+        }
+      }, /*#__PURE__*/React.createElement(_Header.Header, {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 141,
+          columnNumber: 9
+        }
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "container",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 142,
+          columnNumber: 9
+        }
+      }, /*#__PURE__*/React.createElement("p", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 143,
+          columnNumber: 11
+        }
+      }, "By default, all toasts will inherit ToastContainer's props. Props defined on toast supersede ToastContainer's props. Props marked with * can only be set on the ToastContainer. The demo is not exhaustive, check the repo for more!"), /*#__PURE__*/React.createElement("section", {
+        className: "container__options",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 149,
+          columnNumber: 11
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 150,
+          columnNumber: 13
+        }
+      }, /*#__PURE__*/React.createElement("h3", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 151,
+          columnNumber: 15
+        }
+      }, "Position"), /*#__PURE__*/React.createElement("ul", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 152,
+          columnNumber: 15
+        }
+      }, /*#__PURE__*/React.createElement(_Radio.Radio, {
+        options: _index.toast.POSITION,
+        name: "position",
+        checked: this.state.position,
+        onChange: this.handleRadioOrSelect,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 153,
+          columnNumber: 17
+        }
+      }))), /*#__PURE__*/React.createElement("div", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 161,
+          columnNumber: 13
+        }
+      }, /*#__PURE__*/React.createElement("h3", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 162,
+          columnNumber: 15
+        }
+      }, "Type"), /*#__PURE__*/React.createElement("ul", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 163,
+          columnNumber: 15
+        }
+      }, /*#__PURE__*/React.createElement(_Radio.Radio, {
+        options: _index.toast.TYPE,
+        name: "type",
+        checked: this.state.type,
+        onChange: this.handleRadioOrSelect,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 164,
+          columnNumber: 17
+        }
+      }))), /*#__PURE__*/React.createElement("div", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 172,
+          columnNumber: 13
+        }
+      }, /*#__PURE__*/React.createElement("h3", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 173,
+          columnNumber: 15
+        }
+      }, "Options"), /*#__PURE__*/React.createElement("div", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 174,
+          columnNumber: 15
+        }
+      }, /*#__PURE__*/React.createElement("label", {
+        htmlFor: "autoClose",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 175,
+          columnNumber: 17
+        }
+      }, "Delay", /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        name: "autoClose",
+        id: "autoClose",
+        value: this.state.autoClose,
+        onChange: this.handleAutoCloseDelay,
+        disabled: this.state.disableAutoClose,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 177,
+          columnNumber: 19
+        }
+      }), "ms"), /*#__PURE__*/React.createElement("label", {
+        htmlFor: "transition",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 187,
+          columnNumber: 17
+        }
+      }, "Transition", /*#__PURE__*/React.createElement("select", {
+        name: "transition",
+        id: "transition",
+        onChange: this.handleRadioOrSelect,
+        value: this.state.transition,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 189,
+          columnNumber: 19
+        }
+      }, Object.keys(transitions).map(k => /*#__PURE__*/React.createElement("option", {
+        key: k,
+        value: k,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 196,
+          columnNumber: 23
+        }
+      }, k)))), /*#__PURE__*/React.createElement("br", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 202,
+          columnNumber: 17
+        }
+      }), /*#__PURE__*/React.createElement("label", {
+        htmlFor: "progress",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 203,
+          columnNumber: 17
+        }
+      }, "Progress", /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        name: "progress",
+        id: "progress",
+        value: this.state.progress,
+        onChange: this.handleRadioOrSelect,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 205,
+          columnNumber: 19
+        }
+      })), /*#__PURE__*/React.createElement("label", {
+        htmlFor: "limit",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 213,
+          columnNumber: 17
+        }
+      }, "Limit", /*#__PURE__*/React.createElement("input", {
+        type: "number",
+        name: "limit",
+        id: "limit",
+        value: this.state.limit,
+        onChange: this.handleRadioOrSelect,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 215,
+          columnNumber: 19
+        }
+      }))), /*#__PURE__*/React.createElement("ul", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 224,
+          columnNumber: 15
+        }
+      }, this.renderFlags()), /*#__PURE__*/React.createElement("ul", {
+        className: "container__actions",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 225,
+          columnNumber: 15
+        }
+      }, /*#__PURE__*/React.createElement("li", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 226,
+          columnNumber: 17
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        className: "btn",
+        onClick: this.showToast,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 227,
+          columnNumber: 19
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        role: "img",
+        "aria-label": "show alert",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 228,
+          columnNumber: 21
+        }
+      }, "\uD83D\uDE80"), ' ', "Show Toast")), /*#__PURE__*/React.createElement("li", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 234,
+          columnNumber: 17
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        className: "btn",
+        onClick: this.updateToast,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 235,
+          columnNumber: 19
+        }
+      }, "Update")), /*#__PURE__*/React.createElement("li", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 239,
+          columnNumber: 17
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        className: "btn bg-red",
+        onClick: this.clearAll,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 240,
+          columnNumber: 19
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        role: "img",
+        "aria-label": "clear all",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 241,
+          columnNumber: 21
+        }
+      }, "\uD83D\uDCA9"), ' ', "Clear All")), /*#__PURE__*/React.createElement("li", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 247,
+          columnNumber: 17
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        className: "btn bg-blue",
+        onClick: this.handleReset,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 248,
+          columnNumber: 19
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        role: "img",
+        "aria-label": "reset options",
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 249,
+          columnNumber: 21
+        }
+      }, "\uD83D\uDD04"), ' ', "Reset"))))), /*#__PURE__*/React.createElement("section", {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 258,
+          columnNumber: 11
+        }
+      }, /*#__PURE__*/React.createElement(_ContainerCode.ContainerCode, _extends({}, this.state, {
+        isDefaultProps: this.isDefaultProps(),
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 259,
+          columnNumber: 13
+        }
+      })), /*#__PURE__*/React.createElement(_ToastCode.ToastCode, _extends({}, this.state, {
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 263,
+          columnNumber: 13
+        }
+      })))), /*#__PURE__*/React.createElement(_index.ToastContainer, _extends({}, this.state, {
+        transition: transitions[this.state.transition],
+        autoClose: this.state.disableAutoClose ? false : this.state.autoClose,
+        __self: this,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 266,
+          columnNumber: 9
+        }
+      })));
+    }
+
+  }
+
+  exports.App = App;
+  helpers.postlude(module);
+} finally {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
