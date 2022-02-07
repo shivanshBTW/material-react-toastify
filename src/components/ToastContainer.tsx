@@ -6,13 +6,13 @@ import { CloseButton } from './CloseButton';
 import { Slide } from './Transitions';
 import {
   POSITION,
-  DEFAULT,
   parseClassName,
-  objectValues,
-  isFn
+  // objectValues,
+  isFn,
+  Direction,
+  Default
 } from '../utils';
-import { Bounce } from './Transitions';
-import { POSITION, Direction, Default, parseClassName, isFn } from '../utils';
+// import { Bounce } from './Transitions';
 import { useToastContainer } from '../hooks';
 import { ToastContainerProps, ToastPosition } from '../types';
 
