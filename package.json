@@ -1,7 +1,7 @@
 {
   "name": "material-react-toastify",
-  "version": "1.0.1",
-  "description": "React Material-UI Snackbars made easy",
+  "version": "2.0.1",
+  "description": "React Material-UI Snackbar Notifications made easy",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "directories": {
@@ -18,25 +18,25 @@
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-react": "^7.8.3",
-    "@testing-library/react": "^9.4.0",
+    "parcel": "^2.0.0-beta.1",
+    "react-app-polyfill": "^2.0.0",
+    "@testing-library/react": "^12.0.0",
     "@types/jest": "^24.9.0",
-    "@types/react": "^16.9.34",
-    "@types/react-dom": "^16.9.6",
-    "@types/react-transition-group": "^4.2.4",
+    "@types/react": "^17.0.19",
+    "@types/react-dom": "^17.0.9",
     "coveralls": "^3.0.9",
     "cssnano": "^4.1.10",
     "cssnano-cli": "^1.0.5",
     "husky": "^4.2.0",
-    "parcel": "^2.0.0-beta.1",
-    "postcss": "^7.0.27",
+    "postcss": "^8.2.13",
     "postcss-cli": "^7.1.0",
-    "react": "^16.13.1",
-    "react-app-polyfill": "^2.0.0",
-    "react-dom": "^16.13.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "sass": "^1.26.0",
-    "tsdx": "^0.12.3",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.5"
+    "style2js": "^1.0.0",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.3.1",
+    "typescript": "^4.3.5"
   },
   "scripts": {
     "start": "cd example && npm run start",
@@ -49,7 +49,8 @@
     "sass-minimal": "sass scss/minimal.scss dist/ReactToastify.minimal.css",
     "postsass": "postcss dist/ReactToastify.css --use autoprefixer -m -o dist/ReactToastify.css",
     "postsass-minimal": "cssnano dist/ReactToastify.minimal.css dist/ReactToastify.minimal.css --no-zindex --no-reduceIdents",
-    "style": "npm run sass && npm run sass-minimal && cssnano dist/ReactToastify.css dist/ReactToastify.min.css --no-zindex --no-reduceIdents"
+    "style": "npm run sass && npm run sass-minimal && cssnano dist/ReactToastify.css dist/ReactToastify.min.css --no-zindex --no-reduceIdents && npm run style-injector",
+    "style-injector": "style2js --out-dir dist dist/ReactToastify.min.css"
   },
   "keywords": [
     "react",
@@ -93,7 +94,7 @@
   },
   "eslint": {
     "rules": {
-      "react-hooks/exhaustive-deps": "off"
+      "react-hooks/exhaustive-deps": "warn"
     }
   },
   "jest": {

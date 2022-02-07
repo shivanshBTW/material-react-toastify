@@ -1,8 +1,8 @@
 import * as React from 'react';
 import cx from 'clsx';
 
-import { TYPE, DEFAULT, isFn } from './../utils';
-import { TypeOptions, ToastClassName } from '../types';
+import { TYPE, Default, isFn } from './../utils';
+import { TypeOptions, ToastClassName, Theme } from '../types';
 
 export interface ProgressBarProps {
   /**
@@ -24,6 +24,11 @@ export interface ProgressBarProps {
    * Optional type : info, success ...
    */
   type: TypeOptions;
+
+  /**
+   * The theme that is currently used
+   */
+  theme: Theme;
 
   /**
    * Hide or not the progress bar
@@ -72,7 +77,8 @@ export function ProgressBar({
   controlledProgress,
   progress,
   rtl,
-  isIn
+  isIn,
+  theme
 }: ProgressBarProps) {
   const style: React.CSSProperties = {
     ...userStyle,
@@ -82,23 +88,24 @@ export function ProgressBar({
   };
 
   if (controlledProgress) style.transform = `scaleX(${progress})`;
-  const defaultClassArr = [
-    `${DEFAULT.CSS_NAMESPACE}__progress-bar`,
+  const defaultClassName = cx(
+    `${Default.CSS_NAMESPACE}__progress-bar`,
     controlledProgress
-      ? `${DEFAULT.CSS_NAMESPACE}__progress-bar--controlled`
-      : `${DEFAULT.CSS_NAMESPACE}__progress-bar--animated`,
-    `${DEFAULT.CSS_NAMESPACE}__progress-bar--${type}`,
+      ? `${Default.CSS_NAMESPACE}__progress-bar--controlled`
+      : `${Default.CSS_NAMESPACE}__progress-bar--animated`,
+    `${Default.CSS_NAMESPACE}__progress-bar-theme--${theme}`,
+    `${Default.CSS_NAMESPACE}__progress-bar--${type}`,
     {
-      [`${DEFAULT.CSS_NAMESPACE}__progress-bar--rtl`]: rtl
+      [`${Default.CSS_NAMESPACE}__progress-bar--rtl`]: rtl
     }
-  ];
+  );
   const classNames = isFn(className)
     ? className({
         rtl,
         type,
-        defaultClassName: cx(...defaultClassArr)
+        defaultClassName
       })
-    : cx(...[...defaultClassArr, className]);
+    : cx(defaultClassName, className);
 
   // 🧐 controlledProgress is derived from progress
   // so if controlledProgress is set
@@ -114,7 +121,18 @@ export function ProgressBar({
           }
   };
 
-  return <div className={classNames} style={style} {...animationEvent} />;
+  // TODO: add aria-valuenow, aria-valuemax, aria-valuemin
+
+  return (
+    <div
+      role="progressbar"
+      aria-hidden={hide ? 'true' : 'false'}
+      aria-label="notification timer"
+      className={classNames}
+      style={style}
+      {...animationEvent}
+    />
+  );
 }
 
 ProgressBar.defaultProps = {

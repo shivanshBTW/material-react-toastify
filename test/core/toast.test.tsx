@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
-import { render } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 
-import '../__mocks__/react-transition-group';
-import { cssClasses } from '../helpers';
+import { cssClasses, triggerAnimationEnd } from '../helpers';
 import { eventManager, toast, Event } from '../../src/core';
 import { ContainerInstance } from '../../src/hooks';
-import { DEFAULT, cssTransition } from '../../src/utils';
+import { cssTransition } from '../../src/utils';
 import { Id } from '../../src/types';
 import { ToastContainer } from '../../src/components';
 
@@ -18,9 +16,21 @@ beforeEach(() => {
     .off(Event.Show)
     .off(Event.Clear)
     .off(Event.Change);
+
+  jest.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {
+    callback(1);
+    return 1;
+  });
 });
+
+afterEach(() => {
+  (window.requestAnimationFrame as jest.Mock).mockRestore();
+});
+
 const containerId = 'foo';
 const containerInstance: ContainerInstance = {
+  count: 0,
+  queue: [],
   containerId,
   displayedToast: 0,
   props: {},
@@ -50,7 +60,7 @@ describe('toastify', () => {
     act(() => {
       toast('hello');
     });
-    expect(document.body.innerHTML.length).toBe(0);
+    expect(screen.queryByText(/hello/)).toBe(null);
   });
 
   it('Should lazy mount a ToastContainer if it is not mounted, when opt-in', () => {
@@ -95,9 +105,7 @@ describe('toastify', () => {
     });
 
     expectContainerToBeMounted();
-    expect(
-      document.querySelector(`.${DEFAULT.CSS_NAMESPACE}__toast-container--rtl`)
-    ).not.toBe(null);
+    expect(document.querySelector(cssClasses.rtl)).not.toBe(null);
     unmountLazyContainer();
   });
 
@@ -147,7 +155,7 @@ describe('toastify', () => {
       expect(fn).toHaveBeenCalled();
     });
 
-    it("Should be able to unsubscribe to onChange event", () => {
+    it('Should be able to unsubscribe to onChange event', () => {
       render(<ToastContainer />);
       const fn = jest.fn();
       const off = toast.onChange(fn);
@@ -198,26 +206,27 @@ describe('toastify', () => {
   });
 
   it('Should be able remove toast programmatically', () => {
-    const { queryByText } = render(<ToastContainer />);
+    render(<ToastContainer />);
     let id: Id;
     act(() => {
       id = toast('hello');
       jest.runAllTimers();
     });
 
-    expect(queryByText('hello')).not.toBe(null);
+    expect(screen.getByText('hello')).not.toBe(null);
 
     act(() => {
       toast.dismiss(id);
       jest.runAllTimers();
+      triggerAnimationEnd(screen.getByText('hello'));
     });
 
-    expect(queryByText('hello')).toBe(null);
+    expect(screen.queryByText('hello')).toBe(null);
   });
 
   describe('update function', () => {
     it('Should be able to update an existing toast', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       let id: Id;
 
       act(() => {
@@ -225,7 +234,7 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -234,12 +243,12 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).toBe(null);
-      expect(queryByText('foobar')).not.toBe(null);
+      expect(screen.queryByText('hello')).toBe(null);
+      expect(screen.getByText('foobar')).not.toBe(null);
     });
 
     it('Should be able to update the same toast many times', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       let id: Id;
 
       act(() => {
@@ -247,7 +256,7 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -256,7 +265,7 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('foobar')).not.toBe(null);
+      expect(screen.getByText('foobar')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -265,18 +274,18 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('peace')).not.toBe(null);
+      expect(screen.getByText('peace')).not.toBe(null);
     });
 
     it('Should be able to update a Toast and keep the same content', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       let id: Id;
       act(() => {
         id = toast('hello');
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -284,17 +293,17 @@ describe('toastify', () => {
         });
         jest.runAllTimers();
       });
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id);
         jest.runAllTimers();
       });
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
     });
 
     it('Should update a toast only if it exist and if the container is mounted', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
 
       act(() => {
         toast.update(0, {
@@ -303,15 +312,11 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).toBe(null);
+      expect(screen.queryByText('hello')).toBe(null);
     });
 
-    /**
-     * This test trigger a warning but it's a false positif
-     *  Warning: Encountered two children with the same key, `.$toast-1`. ...
-     */
     it('Should be able to update the toastId', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       const toastId = 'bar';
       const updateId = 'foo';
 
@@ -322,8 +327,8 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
-      expect(queryByText('foo')).toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
+      expect(screen.queryByText('foo')).toBe(null);
       expect(toast.isActive(toastId)).toBe(true);
       expect(toast.isActive(updateId)).toBe(false);
 
@@ -335,8 +340,9 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).toBe(null);
-      expect(queryByText('foo')).not.toBe(null);
+      expect(screen.queryByText('hello')).toBe(null);
+
+      expect(screen.getByText('foo')).not.toBe(null);
       expect(toast.isActive(toastId)).toBe(false);
       expect(toast.isActive(updateId)).toBe(true);
     });
@@ -437,7 +443,7 @@ describe('toastify', () => {
       toast.warning('warning');
       toast.info('info');
       toast.warn('warn');
-      toast.dark("dark");
+      toast.dark('dark');
       jest.runAllTimers();
     });
     expect(queryByText('default')).not.toBe(null);
@@ -484,28 +490,28 @@ describe('toastify', () => {
     });
   });
 
-  it("should remove toast even when not collapsing on exit", () => {
+  it('should remove toast even when not collapsing on exit', () => {
     const Transition = cssTransition({
       enter: 'foo',
       exit: 'bar',
-      duration: [300, 500],
       collapse: false
     });
-    
-    const { queryByText } = render(<ToastContainer transition={Transition}/>);
+
+    render(<ToastContainer transition={Transition} />);
     let id: Id;
     act(() => {
       id = toast('hello');
       jest.runAllTimers();
     });
 
-    expect(queryByText('hello')).not.toBe(null);
+    expect(screen.getByText('hello')).not.toBe(null);
 
     act(() => {
       toast.dismiss(id);
       jest.runAllTimers();
+      triggerAnimationEnd(screen.getByText('hello'));
     });
 
-    expect(queryByText('hello')).toBe(null);
-  })
+    expect(screen.queryByText('hello')).toBe(null);
+  });
 });

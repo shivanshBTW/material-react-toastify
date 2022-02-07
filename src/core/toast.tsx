@@ -11,9 +11,10 @@ import {
   ToastContainerProps,
   UpdateOptions,
   ClearWaitingQueueParams,
-  NotValidatedToastProps
+  NotValidatedToastProps,
+  TypeOptions
 } from '../types';
-import { ContainerInstance } from 'hooks';
+import { ContainerInstance } from '../hooks';
 import { ToastContainer } from '../components';
 
 interface EnqueuedToast {
@@ -29,25 +30,10 @@ let queue: EnqueuedToast[] = [];
 let lazy = false;
 
 /**
- * Check whether any container is currently mounted in the DOM
- */
-function isAnyContainerMounted() {
-  return containers.size > 0;
-}
-
-/**
- * Get the container by id. Returns the last container declared when no id is given.
- */
-function getContainer(containerId?: Id) {
-  if (!isAnyContainerMounted()) return null;
-  return containers.get(!containerId ? latestInstance : containerId);
-}
-
-/**
  * Get the toast by id, given it's in the DOM, otherwise returns null
  */
 function getToast(toastId: Id, { containerId }: ToastOptions) {
-  const container = getContainer(containerId);
+  const container = containers.get(containerId || latestInstance);
   if (!container) return null;
 
   return container.getToast(toastId);
@@ -57,7 +43,9 @@ function getToast(toastId: Id, { containerId }: ToastOptions) {
  * Generate a random toastId
  */
 function generateToastId() {
-  return (Math.random().toString(36) + Date.now().toString(36)).substr(2, 10);
+  return Math.random()
+    .toString(36)
+    .substring(2, 9);
 }
 
 /**
@@ -79,7 +67,7 @@ function dispatchToast(
   content: ToastContent,
   options: NotValidatedToastProps
 ): Id {
-  if (isAnyContainerMounted()) {
+  if (containers.size > 0) {
     eventManager.emit(Event.Show, content, options);
   } else {
     queue.push({ content, options });
@@ -105,40 +93,130 @@ function mergeOptions(type: string, options?: ToastOptions) {
   } as NotValidatedToastProps;
 }
 
-const toast = (content: ToastContent, options?: ToastOptions) =>
-  dispatchToast(content, mergeOptions(TYPE.DEFAULT, options));
+function createToastByType(type: string) {
+  return (content: ToastContent, options?: ToastOptions) =>
+    dispatchToast(content, mergeOptions(type, options));
+}
 
-toast.success = (content: ToastContent, options?: ToastOptions) =>
-  dispatchToast(content, mergeOptions(TYPE.SUCCESS, options));
+function toast(content: ToastContent, options?: ToastOptions) {
+  return dispatchToast(content, mergeOptions(TYPE.DEFAULT, options));
+}
 
-toast.info = (content: ToastContent, options?: ToastOptions) =>
-  dispatchToast(content, mergeOptions(TYPE.INFO, options));
+toast.loading = (content: ToastContent, options?: ToastOptions) =>
+  dispatchToast(
+    content,
+    mergeOptions(TYPE.DEFAULT, {
+      isLoading: true,
+      autoClose: false,
+      closeOnClick: false,
+      closeButton: false,
+      draggable: false,
+      ...options
+    })
+  );
 
-toast.error = (content: ToastContent, options?: ToastOptions) =>
-  dispatchToast(content, mergeOptions(TYPE.ERROR, options));
+export interface ToastPromiseParams {
+  pending?: string | UpdateOptions;
+  success?: string | UpdateOptions;
+  error?: string | UpdateOptions;
+}
 
-toast.warning = (content: ToastContent, options?: ToastOptions) =>
-  dispatchToast(content, mergeOptions(TYPE.WARNING, options));
+function handlePromise<T>(
+  promise: Promise<T> | (() => Promise<T>),
+  { pending, error, success }: ToastPromiseParams,
+  options?: ToastOptions
+) {
+  let id: Id;
 
-toast.dark = (content: ToastContent, options?: ToastOptions) =>
-  dispatchToast(content, mergeOptions(TYPE.DARK, options));
+  if (pending) {
+    id = isStr(pending)
+      ? toast.loading(pending, options)
+      : toast.loading(pending.render, {
+          ...options,
+          ...(pending as ToastOptions)
+        });
+  }
 
-/**
- * Maybe I should remove warning in favor of warn, I don't know
- */
+  const resetParams = {
+    isLoading: null,
+    autoClose: null,
+    closeOnClick: null,
+    closeButton: null,
+    draggable: null
+  };
+
+  const resolver = (
+    type: TypeOptions,
+    input: string | UpdateOptions | undefined,
+    result: T
+  ) => {
+    // Remove the toast if the input has not been provided. This prevents the toast from hanging
+    // in the pending state if a success/error toast has not been provided.
+    if (input == null) {
+      toast.dismiss(id);
+      return;
+    }
+
+    const baseParams = {
+      type,
+      ...resetParams,
+      ...options,
+      data: result
+    };
+    const params = isStr(input) ? { render: input } : input;
+
+    // if the id is set we know that it's an update
+    if (id) {
+      toast.update(id, {
+        ...baseParams,
+        ...params
+      });
+    } else {
+      // using toast.promise without loading
+      toast(params.render, {
+        ...baseParams,
+        ...params
+      } as ToastOptions);
+    }
+
+    return result;
+  };
+
+  const p = isFn(promise) ? promise() : promise;
+
+  //call the resolvers only when needed
+  p.then(result => resolver('success', success, result)).catch(err =>
+    resolver('error', error, err)
+  );
+
+  return p;
+}
+
+toast.promise = handlePromise;
+toast.success = createToastByType(TYPE.SUCCESS);
+toast.info = createToastByType(TYPE.INFO);
+toast.error = createToastByType(TYPE.ERROR);
+toast.warning = createToastByType(TYPE.WARNING);
 toast.warn = toast.warning;
+toast.dark = (content: ToastContent, options?: ToastOptions) =>
+  dispatchToast(
+    content,
+    mergeOptions(TYPE.DEFAULT, {
+      theme: 'dark',
+      ...options
+    })
+  );
 
 /**
  * Remove toast programmaticaly
  */
-toast.dismiss = (id?: Id) =>
-  isAnyContainerMounted() && eventManager.emit(Event.Clear, id);
+toast.dismiss = (id?: Id) => eventManager.emit(Event.Clear, id);
 
 /**
  * Clear waiting queue when limit is used
  */
 toast.clearWaitingQueue = (params: ClearWaitingQueueParams = {}) =>
-  isAnyContainerMounted() && eventManager.emit(Event.ClearWaitingQueue, params);
+  eventManager.emit(Event.ClearWaitingQueue, params);
 
 /**
  * return true if one container is displaying the toast
@@ -172,10 +250,7 @@ toast.update = (toastId: Id, options: UpdateOptions = {}) => {
 
       if (nextOptions.toastId !== toastId) nextOptions.staleId = toastId;
 
-      const content =
-        typeof nextOptions.render !== 'undefined'
-          ? nextOptions.render
-          : oldContent;
+      const content = nextOptions.render || oldContent;
       delete nextOptions.render;
 
       dispatchToast(content, nextOptions);
@@ -207,6 +282,7 @@ toast.onChange = (callback: OnChangeCallback) => {
 
 /**
  * Configure the ToastContainer when lazy mounted
+ * Prefer ToastContainer over this one
  */
 toast.configure = (config: ToastContainerProps = {}) => {
   lazy = true;

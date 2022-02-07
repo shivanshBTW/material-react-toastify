@@ -8,7 +8,7 @@ type KeyOfPosition =
   | 'BOTTOM_RIGHT'
   | 'BOTTOM_CENTER';
 
-type KeyOfType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'DEFAULT' | 'DARK';
+type KeyOfType = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'DEFAULT';
 
 export const POSITION: { [key in KeyOfPosition]: ToastPosition } = {
   TOP_LEFT: 'top-left',
@@ -24,12 +24,21 @@ export const TYPE: { [key in KeyOfType]: TypeOptions } = {
   SUCCESS: 'success',
   WARNING: 'warning',
   ERROR: 'error',
-  DEFAULT: 'default',
-  DARK: 'dark'
+  DEFAULT: 'default'
 };
 
-export enum DEFAULT {
+export const enum Default {
   COLLAPSE_DURATION = 300,
   DEBOUNCE_DURATION = 50,
-  CSS_NAMESPACE = 'Toastify'
+  CSS_NAMESPACE = 'Toastify',
+  DRAGGABLE_PERCENT = 80
+}
+
+export const enum Direction {
+  X = 'x',
+  Y = 'y'
+}
+
+export const enum SyntheticEvent {
+  ENTRANCE_ANIMATION_END = 'd'
 }
