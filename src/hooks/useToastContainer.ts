@@ -3,17 +3,18 @@ import {
   useRef,
   useReducer,
   cloneElement,
-  isValidElement
+  isValidElement,
+  useState,
+  ReactElement
 } from 'react';
 import {
   parseClassName,
   canBeRendered,
-  isBool,
   isFn,
   isNum,
   isStr,
-  hasToastId,
-  getAutoCloseDelay
+  getAutoCloseDelay,
+  toToastItem
 } from '../utils';
 import { eventManager, Event } from '../core/eventManager';
 
@@ -25,14 +26,10 @@ import {
   Toast,
   ToastPosition,
   ClearWaitingQueueParams,
-  NotValidatedToastProps,
-  ToastTransition
+  NotValidatedToastProps
 } from '../types';
-import { useKeeper } from './useKeeper';
-import { reducer } from './toastContainerReducer';
 
-type CollectionItem = Record<Id, Toast>;
-type ToastToRender = Partial<Record<ToastPosition, Toast[]>>;
+import { getIcon } from '../components/Icons';
 
 interface QueuedToast {
   toastContent: ToastContent;
@@ -46,24 +43,27 @@ export interface ContainerInstance {
   props: ToastContainerProps;
   containerId?: Id | null;
   isToastActive: (toastId: Id) => boolean;
-  getToast: (id: Id) => Toast | null;
+  getToast: (id: Id) => Toast | null | undefined;
+  queue: QueuedToast[];
+  count: number;
 }
 
 export function useToastContainer(props: ToastContainerProps) {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
-  const [toast, dispatch] = useReducer(reducer, []);
+  const [toastIds, setToastIds] = useState<Id[]>([]);
   const containerRef = useRef(null);
-  let toastCount = useKeeper(0);
-  let queue = useKeeper<QueuedToast[]>([]);
-  const collection = useKeeper<CollectionItem>({});
-  const instance = useKeeper<ContainerInstance>({
+  const toastToRender = useRef(new Map<Id, Toast>()).current;
+  const isToastActive = (id: Id) => toastIds.indexOf(id) !== -1;
+  const instance = useRef<ContainerInstance>({
     toastKey: 1,
     displayedToast: 0,
+    count: 0,
+    queue: [],
     props,
     containerId: null,
-    isToastActive: isToastActive,
-    getToast: id => collection[id] || null
-  });
+    isToastActive,
+    getToast: id => toastToRender.get(id)
+  }).current;
 
   useEffect(() => {
     instance.containerId = props.containerId;
@@ -74,66 +74,36 @@ export function useToastContainer(props: ToastContainerProps) {
       .on(Event.ClearWaitingQueue, clearWaitingQueue)
       .emit(Event.DidMount, instance);
 
-    return () => eventManager.emit(Event.WillUnmount, instance);
+    return () => {
+      toastToRender.clear();
+      eventManager.emit(Event.WillUnmount, instance);
+    };
   }, []);
 
   useEffect(() => {
-    instance.isToastActive = isToastActive;
-    instance.displayedToast = toast.length;
-    eventManager.emit(Event.Change, toast.length, props.containerId);
-  }, [toast]);
-
-  useEffect(() => {
     instance.props = props;
+    instance.isToastActive = isToastActive;
+    instance.displayedToast = toastIds.length;
   });
 
-  function isToastActive(id: Id) {
-    return toast.indexOf(id) !== -1;
-  }
-
   function clearWaitingQueue({ containerId }: ClearWaitingQueueParams) {
-    const { limit, enableMultiContainer } = instance.props;
-    if (
-      limit &&
-      (!containerId ||
-        (instance.containerId === containerId && enableMultiContainer))
-    ) {
-      toastCount -= queue.length;
-      queue = [];
+    const { limit } = instance.props;
+    if (limit && (!containerId || instance.containerId === containerId)) {
+      instance.count -= instance.queue.length;
+      instance.queue = [];
     }
   }
 
   function removeToast(toastId?: Id) {
-    const queueLen = queue.length;
-    toastCount = hasToastId(toastId)
-      ? toastCount - 1
-      : toastCount - instance.displayedToast;
-
-    if (toastCount < 0) toastCount = 0;
-
-    if (queueLen > 0) {
-      const freeSlot = hasToastId(toastId) ? 1 : instance.props.limit!;
-
-      if (queueLen === 1 || freeSlot === 1) {
-        instance.displayedToast++;
-        dequeueToast();
-      } else {
-        const toDequeue = freeSlot > queueLen ? queueLen : freeSlot;
-        instance.displayedToast = toDequeue;
-
-        for (let i = 0; i < toDequeue; i++) dequeueToast();
-      }
-    }
-    dispatch({ type: 'REMOVE', toastId });
+    setToastIds(state =>
+      toastId == null ? [] : state.filter(id => id !== toastId)
+    );
   }
 
   function dequeueToast() {
-    const { toastContent, toastProps, staleId } = queue.shift() as QueuedToast;
-
-    // ensure that exit transition has been completed, hence the timeout
-    setTimeout(() => {
-      appendToast(toastContent, toastProps, staleId);
-    }, 500);
+    const { toastContent, toastProps, staleId } =
+      instance.queue.shift() as QueuedToast;
+    appendToast(toastContent, toastProps, staleId);
   }
 
   /**
@@ -141,112 +111,117 @@ export function useToastContainer(props: ToastContainerProps) {
    * check for multi-container, build only if associated
    * check for duplicate toastId if no update
    */
-  function isNotValid({
-    containerId,
-    toastId,
-    updateId
-  }: NotValidatedToastProps) {
-    return !containerRef.current ||
+  function isNotValid(options: NotValidatedToastProps) {
+    return (
+      !containerRef.current ||
       (instance.props.enableMultiContainer &&
-        containerId !== instance.props.containerId) ||
-      (instance.isToastActive(toastId) && updateId == null)
-      ? true
-      : false;
+        options.containerId !== instance.props.containerId) ||
+      (toastToRender.has(options.toastId) && options.updateId == null)
+    );
   }
 
-  // this function and all the function called inside needs to rely on ref(`useKeeper`)
+  // this function and all the function called inside needs to rely on refs
   function buildToast(
     content: ToastContent,
     { delay, staleId, ...options }: NotValidatedToastProps
   ) {
     if (!canBeRendered(content) || isNotValid(options)) return;
 
-    const { toastId, updateId } = options;
-    const { props, isToastActive } = instance;
+    const { toastId, updateId, data } = options;
+    const { props } = instance;
     const closeToast = () => removeToast(toastId);
-    const isNotAnUpdate = !isToastActive(toastId);
+    const isNotAnUpdate = updateId == null;
 
-    if (isNotAnUpdate) toastCount++;
+    if (isNotAnUpdate) instance.count++;
 
-    const toastProps: ToastProps = {
+    const toastProps = {
+      ...props,
+      style: props.toastStyle,
+      key: instance.toastKey++,
+      ...options,
       toastId,
       updateId,
-      key: options.key || instance.toastKey++,
-      type: options.type,
-      closeToast: closeToast,
-      closeButton: options.closeButton,
-      rtl: props.rtl,
-      position: options.position || (props.position as ToastPosition),
-      transition: options.transition || (props.transition as ToastTransition),
+      data,
+      closeToast,
+      isIn: false,
       className: parseClassName(options.className || props.toastClassName),
       bodyClassName: parseClassName(
         options.bodyClassName || props.bodyClassName
       ),
-      style: options.style || props.toastStyle,
-      bodyStyle: options.bodyStyle || props.bodyStyle,
-      onClick: options.onClick || props.onClick,
-      pauseOnHover: isBool(options.pauseOnHover)
-        ? options.pauseOnHover
-        : props.pauseOnHover,
-      pauseOnFocusLoss: isBool(options.pauseOnFocusLoss)
-        ? options.pauseOnFocusLoss
-        : props.pauseOnFocusLoss,
-      draggable: isBool(options.draggable)
-        ? options.draggable
-        : props.draggable,
-      draggablePercent: isNum(options.draggablePercent)
-        ? options.draggablePercent
-        : (props.draggablePercent as number),
-      closeOnClick: isBool(options.closeOnClick)
-        ? options.closeOnClick
-        : props.closeOnClick,
       progressClassName: parseClassName(
         options.progressClassName || props.progressClassName
       ),
-      progressStyle: options.progressStyle || props.progressStyle,
-      autoClose: getAutoCloseDelay(options.autoClose, props.autoClose),
-      hideProgressBar: isBool(options.hideProgressBar)
-        ? options.hideProgressBar
-        : props.hideProgressBar,
-      progress: options.progress,
-      role: isStr(options.role) ? options.role : props.role,
+      autoClose: options.isLoading
+        ? false
+        : getAutoCloseDelay(options.autoClose, props.autoClose),
       deleteToast() {
-        removeFromCollection(toastId);
+        const removed = toToastItem(toastToRender.get(toastId)!, 'removed');
+        toastToRender.delete(toastId);
+
+        eventManager.emit(Event.Change, removed);
+
+        const queueLen = instance.queue.length;
+        instance.count =
+          toastId == null
+            ? instance.count - instance.displayedToast
+            : instance.count - 1;
+
+        if (instance.count < 0) instance.count = 0;
+
+        if (queueLen > 0) {
+          const freeSlot = toastId == null ? instance.props.limit! : 1;
+
+          if (queueLen === 1 || freeSlot === 1) {
+            instance.displayedToast++;
+            dequeueToast();
+          } else {
+            const toDequeue = freeSlot > queueLen ? queueLen : freeSlot;
+            instance.displayedToast = toDequeue;
+
+            for (let i = 0; i < toDequeue; i++) dequeueToast();
+          }
+        } else {
+          forceUpdate();
+        }
       }
-    };
+    } as ToastProps;
+
+    toastProps.iconOut = getIcon(toastProps);
 
     if (isFn(options.onOpen)) toastProps.onOpen = options.onOpen;
     if (isFn(options.onClose)) toastProps.onClose = options.onClose;
 
-    let closeButton = props.closeButton;
+    toastProps.closeButton = props.closeButton;
 
     if (options.closeButton === false || canBeRendered(options.closeButton)) {
-      closeButton = options.closeButton;
+      toastProps.closeButton = options.closeButton;
     } else if (options.closeButton === true) {
-      closeButton = canBeRendered(props.closeButton) ? props.closeButton : true;
+      toastProps.closeButton = canBeRendered(props.closeButton)
+        ? props.closeButton
+        : true;
     }
-
-    toastProps.closeButton = closeButton;
 
     let toastContent = content;
 
     if (isValidElement(content) && !isStr(content.type)) {
-      toastContent = cloneElement(content, {
-        closeToast
+      toastContent = cloneElement(content as ReactElement, {
+        closeToast,
+        toastProps,
+        data
       });
     } else if (isFn(content)) {
-      toastContent = content({ closeToast });
+      toastContent = content({ closeToast, toastProps, data });
     }
 
     // not handling limit + delay by design. Waiting for user feedback first
     if (
       props.limit &&
       props.limit > 0 &&
-      toastCount > props.limit &&
+      instance.count > props.limit &&
       isNotAnUpdate
     ) {
-      queue.push({ toastContent, toastProps, staleId });
-    } else if (isNum(delay) && (delay as number) > 0) {
+      instance.queue.push({ toastContent, toastProps, staleId });
+    } else if (isNum(delay)) {
       setTimeout(() => {
         appendToast(toastContent, toastProps, staleId);
       }, delay);
@@ -262,46 +237,40 @@ export function useToastContainer(props: ToastContainerProps) {
   ) {
     const { toastId } = toastProps;
 
-    collection[toastId] = {
+    if (staleId) toastToRender.delete(staleId);
+
+    const toast = {
       content,
       props: toastProps
     };
-    dispatch({
-      type: 'ADD',
-      toastId,
-      staleId
-    });
-  }
+    toastToRender.set(toastId, toast);
 
-  function removeFromCollection(toastId: Id) {
-    delete collection[toastId];
-    forceUpdate();
+    setToastIds(state => [...state, toastId].filter(id => id !== staleId));
+    eventManager.emit(
+      Event.Change,
+      toToastItem(toast, toast.props.updateId == null ? 'added' : 'updated')
+    );
   }
 
   function getToastToRender<T>(
     cb: (position: ToastPosition, toastList: Toast[]) => T
   ) {
-    const toastToRender: ToastToRender = {};
-    const toastList = props.newestOnTop
-      ? Object.keys(collection).reverse()
-      : Object.keys(collection);
+    const toRender = new Map<ToastPosition, Toast[]>();
+    const collection = Array.from(toastToRender.values());
 
-    for (let i = 0; i < toastList.length; i++) {
-      const toast = collection[toastList[i]];
+    if (props.newestOnTop) collection.reverse();
+
+    collection.forEach(toast => {
       const { position } = toast.props;
-      toastToRender[position] || (toastToRender[position] = []);
+      toRender.has(position) || toRender.set(position, []);
+      toRender.get(position)!.push(toast);
+    });
 
-      toastToRender[position]!.push(toast);
-    }
-
-    return (Object.keys(toastToRender) as Array<ToastPosition>).map(p =>
-      cb(p, toastToRender[p]!)
-    );
+    return Array.from(toRender, p => cb(p[0], p[1]));
   }
 
   return {
     getToastToRender,
-    collection,
     containerRef,
     isToastActive
   };

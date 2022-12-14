@@ -1,119 +1,89 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
+// https://github.com/yannickcr/eslint-plugin-react/issues/3140
+/* eslint react/prop-types: "off" */
+import React, { forwardRef, StyleHTMLAttributes, useEffect } from 'react';
 import cx from 'clsx';
 
 import { Toast } from './Toast';
 import { CloseButton } from './CloseButton';
-import { Slide } from './Transitions';
-import {
-  POSITION,
-  DEFAULT,
-  parseClassName,
-  objectValues,
-  isFn
-} from '../utils';
-import { useToastContainer } from '../hooks';
+import { Bounce, Slide } from './Transitions';
+import { Direction, Default, parseClassName, isFn } from '../utils';
+import { useToastContainer } from '../hooks/useToastContainer';
 import { ToastContainerProps, ToastPosition } from '../types';
-import { ToastPositioner } from './ToastPositioner';
 
-export const ToastContainer: React.FC<ToastContainerProps> = props => {
-  const { getToastToRender, containerRef, isToastActive } = useToastContainer(
-    props
-  );
-  const { className, style, rtl, containerId } = props;
+export const ToastContainer = forwardRef<HTMLDivElement, ToastContainerProps>(
+  (props, ref) => {
+    const { getToastToRender, containerRef, isToastActive } =
+      useToastContainer(props);
+    const { className, style, rtl, containerId } = props;
 
-  return (
-    <div
-      ref={containerRef}
-      className={DEFAULT.CSS_NAMESPACE as string}
-      id={containerId as string}
-    >
-      {getToastToRender((position, toastList) => {
-        const swag = {
-          className: isFn(className)
-            ? className({
-                position,
-                rtl,
-                defaultClassName: cx(
-                  `${DEFAULT.CSS_NAMESPACE}__toast-container`,
-                  `${DEFAULT.CSS_NAMESPACE}__toast-container--${position}`,
-                  { [`${DEFAULT.CSS_NAMESPACE}__toast-container--rtl`]: rtl }
-                )
-              })
-            : cx(
-                `${DEFAULT.CSS_NAMESPACE}__toast-container`,
-                `${DEFAULT.CSS_NAMESPACE}__toast-container--${position}`,
-                { [`${DEFAULT.CSS_NAMESPACE}__toast-container--rtl`]: rtl },
-                parseClassName(className)
-              ),
-          style:
-            toastList.length === 0
-              ? { ...style, pointerEvents: 'none' }
-              : { ...style }
-        } as any;
-        return (
-          <ToastPositioner {...swag} key={`container-${position}`}>
-            {toastList.map(({ content, props: toastProps }) => {
-              return (
-                <Toast
-                  {...toastProps}
-                  in={isToastActive(toastProps.toastId)}
-                  key={`toast-${toastProps.key}`}
-                  closeButton={
-                    toastProps.closeButton === true
-                      ? CloseButton
-                      : toastProps.closeButton
-                  }
-                >
-                  {content}
-                </Toast>
-              );
-            })}
-          </ToastPositioner>
-        );
-      })}
-    </div>
-  );
-};
+    function getClassName(position: ToastPosition) {
+      const defaultClassName = cx(
+        `${Default.CSS_NAMESPACE}__toast-container`,
+        `${Default.CSS_NAMESPACE}__toast-container--${position}`,
+        { [`${Default.CSS_NAMESPACE}__toast-container--rtl`]: rtl }
+      );
+      return isFn(className)
+        ? className({
+            position,
+            rtl,
+            defaultClassName
+          })
+        : cx(defaultClassName, parseClassName(className));
+    }
 
-if (process.env.NODE_ENV !== 'production') {
-  // @ts-ignore
-  ToastContainer.propTypes = {
-    // @ts-ignore
-    position: PropTypes.oneOf(objectValues(POSITION)),
+    useEffect(() => {
+      if (ref) {
+        (ref as React.MutableRefObject<HTMLDivElement>).current =
+          containerRef.current!;
+      }
+    }, []);
 
-    // @ts-ignore
-    autoClose: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+    return (
+      <div
+        ref={containerRef}
+        className={Default.CSS_NAMESPACE as string}
+        id={containerId as string}
+      >
+        {getToastToRender((position, toastList) => {
+          const containerStyle: React.CSSProperties = !toastList.length
+            ? { ...style, pointerEvents: 'none' }
+            : { ...style };
 
-    // @ts-ignore
-    closeButton: PropTypes.oneOfType([
-      PropTypes.node,
-      PropTypes.bool,
-      PropTypes.func
-    ]),
-    hideProgressBar: PropTypes.bool,
-    pauseOnHover: PropTypes.bool,
-    closeOnClick: PropTypes.bool,
-    newestOnTop: PropTypes.bool,
-    className: PropTypes.any, //oneOfType([PropTypes.func, PropTypes.string]),
-    style: PropTypes.object,
-    toastClassName: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    bodyClassName: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    progressClassName: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    progressStyle: PropTypes.object,
-    transition: PropTypes.func,
-    rtl: PropTypes.bool,
-    draggable: PropTypes.bool,
-    draggablePercent: PropTypes.number,
-    pauseOnFocusLoss: PropTypes.bool,
-    enableMultiContainer: PropTypes.bool,
-    containerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    role: PropTypes.string,
-    onClick: PropTypes.func
-  };
-}
+          return (
+            <div
+              className={getClassName(position)}
+              style={containerStyle}
+              key={`container-${position}`}
+            >
+              {toastList.map(({ content, props: toastProps }, i) => {
+                return (
+                  <Toast
+                    {...toastProps}
+                    isIn={isToastActive(toastProps.toastId)}
+                    style={
+                      {
+                        ...toastProps.style,
+                        '--nth': i + 1,
+                        '--len': toastList.length
+                      } as StyleHTMLAttributes<HTMLDivElement>
+                    }
+                    key={`toast-${toastProps.key}`}
+                  >
+                    {content}
+                  </Toast>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+);
 
-ToastContainer.defaultProps = {
+ToastContainer.displayName = 'ToastContainer';
+
+ToastContainer.defaultProps = { 
   position: POSITION.BOTTOM_LEFT as ToastPosition,
   transition: Slide,
   rtl: false,
@@ -125,6 +95,8 @@ ToastContainer.defaultProps = {
   closeOnClick: true,
   newestOnTop: false,
   draggable: true,
-  draggablePercent: 40,
-  role: 'alert'
+  draggablePercent: Default.DRAGGABLE_PERCENT as number,
+  draggableDirection: Direction.X,
+  role: 'alert',
+  theme: 'light'
 };

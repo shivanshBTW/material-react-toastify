@@ -6,19 +6,19 @@ import {
   DOMAttributes
 } from 'react';
 
-import { isFn } from '../utils';
+import { isFn, Default, Direction, SyntheticEvent } from '../utils';
 import { ToastProps } from '../types';
-import { useKeeper } from './useKeeper';
 
 interface Draggable {
   start: number;
   x: number;
   y: number;
-  deltaX: number;
+  delta: number;
   removalDistance: number;
   canCloseOnClick: boolean;
   canDrag: boolean;
   boundingRect: DOMRect | null;
+  didMove: boolean;
 }
 
 type DragEvent = MouseEvent & TouchEvent;
@@ -36,40 +36,44 @@ function getY(e: DragEvent) {
 }
 
 export function useToast(props: ToastProps) {
-  const [isRunning, setIsRunning] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
   const [preventExitTransition, setPreventExitTransition] = useState(false);
   const toastRef = useRef<HTMLDivElement>(null);
-  const drag = useKeeper<Draggable>({
+  const drag = useRef<Draggable>({
     start: 0,
     x: 0,
     y: 0,
-    deltaX: 0,
+    delta: 0,
     removalDistance: 0,
     canCloseOnClick: true,
     canDrag: false,
-    boundingRect: null
-  });
-  const syncProps = useKeeper(props, true);
+    boundingRect: null,
+    didMove: false
+  }).current;
+  const syncProps = useRef(props);
   const { autoClose, pauseOnHover, closeToast, onClick, closeOnClick } = props;
 
   useEffect(() => {
+    syncProps.current = props;
+  });
+
+  useEffect(() => {
+    if (toastRef.current)
+      toastRef.current.addEventListener(
+        SyntheticEvent.ENTRANCE_ANIMATION_END,
+        playToast,
+        { once: true }
+      );
+
     if (isFn(props.onOpen))
       props.onOpen(isValidElement(props.children) && props.children.props);
 
     return () => {
-      if (isFn(syncProps.onClose))
-        syncProps.onClose(
-          isValidElement(syncProps.children) && syncProps.children.props
-        );
+      const props = syncProps.current;
+      if (isFn(props.onClose))
+        props.onClose(isValidElement(props.children) && props.children.props);
     };
   }, []);
-
-  useEffect(() => {
-    props.draggable && bindDragEvents();
-    return () => {
-      props.draggable && unbindDragEvents();
-    };
-  }, [props.draggable]);
 
   useEffect(() => {
     props.pauseOnFocusLoss && bindFocusEvents();
@@ -81,20 +85,42 @@ export function useToast(props: ToastProps) {
   function onDragStart(
     e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>
   ) {
-    const toast = toastRef.current!;
-    drag.canCloseOnClick = true;
-    drag.canDrag = true;
-    drag.boundingRect = toast.getBoundingClientRect();
-    toast.style.transition = '';
-    drag.start = drag.x = getX(e.nativeEvent as DragEvent);
-    drag.removalDistance = toast.offsetWidth * (props.draggablePercent / 100);
+    if (props.draggable) {
+      // required for ios safari to prevent default swipe behavior
+      if (e.nativeEvent.type === 'touchstart') e.nativeEvent.preventDefault();
+
+      bindDragEvents();
+      const toast = toastRef.current!;
+      drag.canCloseOnClick = true;
+      drag.canDrag = true;
+      drag.boundingRect = toast.getBoundingClientRect();
+      toast.style.transition = '';
+      drag.x = getX(e.nativeEvent as DragEvent);
+      drag.y = getY(e.nativeEvent as DragEvent);
+
+      if (props.draggableDirection === Direction.X) {
+        drag.start = drag.x;
+        drag.removalDistance =
+          toast.offsetWidth * (props.draggablePercent / 100);
+      } else {
+        drag.start = drag.y;
+        drag.removalDistance =
+          toast.offsetHeight *
+          (props.draggablePercent === Default.DRAGGABLE_PERCENT
+            ? props.draggablePercent * 1.5
+            : props.draggablePercent / 100);
+      }
+    }
   }
 
-  function onDragTransitionEnd() {
+  function onDragTransitionEnd(
+    e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>
+  ) {
     if (drag.boundingRect) {
       const { top, bottom, left, right } = drag.boundingRect;
 
       if (
+        e.nativeEvent.type !== 'touchend' &&
         props.pauseOnHover &&
         drag.x >= left &&
         drag.x <= right &&
@@ -117,6 +143,8 @@ export function useToast(props: ToastProps) {
   }
 
   function bindFocusEvents() {
+    if (!document.hasFocus()) pauseToast();
+
     window.addEventListener('focus', playToast);
     window.addEventListener('blur', pauseToast);
   }
@@ -127,6 +155,7 @@ export function useToast(props: ToastProps) {
   }
 
   function bindDragEvents() {
+    drag.didMove = false;
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
 
@@ -144,36 +173,38 @@ export function useToast(props: ToastProps) {
 
   function onDragMove(e: MouseEvent | TouchEvent) {
     const toast = toastRef.current!;
-
-    if (drag.canDrag) {
+    if (drag.canDrag && toast) {
+      drag.didMove = true;
       if (isRunning) pauseToast();
-
       drag.x = getX(e as DragEvent);
-      drag.deltaX = drag.x - drag.start;
       drag.y = getY(e as DragEvent);
+      if (props.draggableDirection === Direction.X) {
+        drag.delta = drag.x - drag.start;
+      } else {
+        drag.delta = drag.y - drag.start;
+      }
 
       // prevent false positif during a toast click
       if (drag.start !== drag.x) drag.canCloseOnClick = false;
-
-      toast.style.transform = `translateX(${drag.deltaX}px)`;
-      toast.style.opacity = `${1 -
-        Math.abs(drag.deltaX / drag.removalDistance)}`;
+      toast.style.transform = `translate${props.draggableDirection}(${drag.delta}px)`;
+      toast.style.opacity = `${
+        1 - Math.abs(drag.delta / drag.removalDistance)
+      }`;
     }
   }
 
   function onDragEnd() {
+    unbindDragEvents();
     const toast = toastRef.current!;
-    if (drag.canDrag) {
+    if (drag.canDrag && drag.didMove && toast) {
       drag.canDrag = false;
-
-      if (Math.abs(drag.deltaX) > drag.removalDistance) {
+      if (Math.abs(drag.delta) > drag.removalDistance) {
         setPreventExitTransition(true);
         props.closeToast();
         return;
       }
-
       toast.style.transition = 'transform 0.2s, opacity 0.2s';
-      toast.style.transform = 'translateX(0)';
+      toast.style.transform = `translate${props.draggableDirection}(0)`;
       toast.style.opacity = '1';
     }
   }

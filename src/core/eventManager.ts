@@ -2,7 +2,8 @@ import {
   Id,
   ToastContent,
   ClearWaitingQueueParams,
-  NotValidatedToastProps
+  NotValidatedToastProps,
+  ToastItem
 } from '../types';
 import { ContainerInstance } from '../hooks';
 
@@ -23,10 +24,9 @@ type OnClearCallback = (id?: Id) => void;
 type OnClearWaitingQueue = (params: ClearWaitingQueueParams) => void;
 type OnDidMountCallback = (containerInstance: ContainerInstance) => void;
 type OnWillUnmountCallback = OnDidMountCallback;
-export type OnChangeCallback = (
-  toast: number,
-  containerId?: number | string
-) => void;
+
+export type OnChangeCallback = (toast: ToastItem) => void;
+
 type Callback =
   | OnShowCallback
   | OnClearCallback
@@ -34,7 +34,7 @@ type Callback =
   | OnDidMountCallback
   | OnWillUnmountCallback
   | OnChangeCallback;
-type TimeoutId = ReturnType<typeof window.setTimeout>;
+type TimeoutId = ReturnType<typeof setTimeout>;
 
 export interface EventManager {
   list: Map<Event, Callback[]>;
@@ -50,16 +50,16 @@ export interface EventManager {
   on(event: Event.Change, callback: OnChangeCallback): EventManager;
   off(event: Event, callback?: Callback): EventManager;
   cancelEmit(event: Event): EventManager;
-  emit(
+  emit<TData>(
     event: Event.Show,
-    content: React.ReactNode,
+    content: React.ReactNode | ToastContent<TData>,
     options: NotValidatedToastProps
   ): void;
   emit(event: Event.Clear, id?: string | number): void;
   emit(event: Event.ClearWaitingQueue, params: ClearWaitingQueueParams): void;
   emit(event: Event.DidMount, containerInstance: ContainerInstance): void;
   emit(event: Event.WillUnmount, containerInstance: ContainerInstance): void;
-  emit(event: Event.Change, toast: number, containerId?: number | string): void;
+  emit(event: Event.Change, data: ToastItem): void;
 }
 
 export const eventManager: EventManager = {
@@ -85,7 +85,7 @@ export const eventManager: EventManager = {
   cancelEmit(event) {
     const timers = this.emitQueue.get(event);
     if (timers) {
-      timers.forEach((timer: TimeoutId) => clearTimeout(timer));
+      timers.forEach(clearTimeout);
       this.emitQueue.delete(event);
     }
 
@@ -103,7 +103,7 @@ export const eventManager: EventManager = {
   emit(event: Event, ...args: any[]) {
     this.list.has(event) &&
       this.list.get(event)!.forEach((callback: Callback) => {
-        const timer = setTimeout(() => {
+        const timer: TimeoutId = setTimeout(() => {
           // @ts-ignore
           callback(...args);
         }, 0);

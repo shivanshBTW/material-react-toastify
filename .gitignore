@@ -10,5 +10,6 @@ cjs/
 esm/
 dist/
 .cache
+/addons
 
 /example/.parcel-cache/

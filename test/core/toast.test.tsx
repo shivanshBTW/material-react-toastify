@@ -1,12 +1,9 @@
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
-import { render } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 
-import '../__mocks__/react-transition-group';
-import { cssClasses } from '../helpers';
+import { triggerAnimationEnd } from '../helpers';
 import { eventManager, toast, Event } from '../../src/core';
-import { ContainerInstance } from '../../src/hooks';
-import { DEFAULT, cssTransition } from '../../src/utils';
+import { cssTransition } from '../../src/utils';
 import { Id } from '../../src/types';
 import { ToastContainer } from '../../src/components';
 
@@ -14,91 +11,25 @@ jest.useFakeTimers();
 
 // Clear all previous event to avoid any clash between tests
 beforeEach(() => {
-  eventManager
-    .off(Event.Show)
-    .off(Event.Clear)
-    .off(Event.Change);
-});
-const containerId = 'foo';
-const containerInstance: ContainerInstance = {
-  containerId,
-  displayedToast: 0,
-  props: {},
-  toastKey: 1,
-  getToast: jest.fn(),
-  isToastActive: jest.fn()
-};
+  eventManager.off(Event.Show).off(Event.Clear).off(Event.Change);
 
-function expectContainerNotToBeMounted() {
-  expect(document.querySelector(cssClasses.container)).toBe(null);
-}
-
-function expectContainerToBeMounted() {
-  expect(document.querySelector(cssClasses.container)).not.toBe(null);
-}
-
-function unmountLazyContainer() {
-  act(() => {
-    eventManager.emit(Event.WillUnmount, containerInstance);
-    jest.runAllTimers();
+  jest.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {
+    callback(1);
+    return 1;
   });
-  expectContainerNotToBeMounted();
-}
+});
+
+afterEach(() => {
+  (window.requestAnimationFrame as jest.Mock).mockRestore();
+  jest.clearAllTimers();
+});
 
 describe('toastify', () => {
   it('Should not crash if no container is mounted', () => {
     act(() => {
       toast('hello');
     });
-    expect(document.body.innerHTML.length).toBe(0);
-  });
-
-  it('Should lazy mount a ToastContainer if it is not mounted, when opt-in', () => {
-    expectContainerNotToBeMounted();
-    toast.configure({
-      containerId
-    });
-
-    act(() => {
-      toast('hello');
-      jest.runAllTimers();
-    });
-    expectContainerToBeMounted();
-    unmountLazyContainer();
-  });
-
-  it('Should mount only one ToastContainer when using lazy container', () => {
-    expectContainerNotToBeMounted();
-    toast.configure({
-      containerId
-    });
-    act(() => {
-      toast('hello');
-      toast('hello');
-      jest.runAllTimers();
-    });
-
-    expect(document.querySelectorAll(cssClasses.container)).toHaveLength(1);
-    unmountLazyContainer();
-  });
-
-  it("Should be possible to configure the ToastContainer even when it's lazy mounted", () => {
-    expectContainerNotToBeMounted();
-    toast.configure({
-      containerId,
-      rtl: true
-    });
-
-    act(() => {
-      toast('hello');
-      jest.runAllTimers();
-    });
-
-    expectContainerToBeMounted();
-    expect(
-      document.querySelector(`.${DEFAULT.CSS_NAMESPACE}__toast-container--rtl`)
-    ).not.toBe(null);
-    unmountLazyContainer();
+    expect(screen.queryByText(/hello/)).toBe(null);
   });
 
   it('Should return a new id each time we emit a notification', () => {
@@ -125,7 +56,7 @@ describe('toastify', () => {
   });
 
   it('Should not use the provided invalid toastId from options', () => {
-    const toastId = (Symbol('myId') as unknown) as Id;
+    const toastId = Symbol('myId') as unknown as Id;
     const id = toast('Hello', { toastId });
 
     expect(id).not.toEqual(toastId);
@@ -147,7 +78,7 @@ describe('toastify', () => {
       expect(fn).toHaveBeenCalled();
     });
 
-    it("Should be able to unsubscribe to onChange event", () => {
+    it('Should be able to unsubscribe to onChange event', () => {
       render(<ToastContainer />);
       const fn = jest.fn();
       const off = toast.onChange(fn);
@@ -171,25 +102,48 @@ describe('toastify', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('The callback should receive the number of toast displayed', done => {
+    it('The callback should receive a toast item with the status `added`', done => {
       render(<ToastContainer />);
-      toast.onChange(count => {
-        expect(count).toBe(1);
-        done();
+      const status = ['added', 'updated', 'removed'];
+
+      toast.onChange(toast => {
+        const currentStatus = status.shift();
+        expect(toast.status).toBe(currentStatus);
+
+        // all status testted
+        if (!status.length) {
+          done();
+        }
+      });
+
+      const id = 'foo';
+      act(() => {
+        toast('hello', {
+          toastId: id
+        });
+        jest.runAllTimers();
       });
 
       act(() => {
-        toast('hello');
+        toast.update(id);
         jest.runAllTimers();
       });
+
+      act(() => {
+        toast.dismiss(id);
+        jest.runAllTimers();
+      });
+
+      triggerAnimationEnd(screen.getByText('hello'));
     });
 
-    it('Should pass containerId as second arg if set', done => {
+    it('Should contains toast data', done => {
       render(<ToastContainer containerId="foo" />);
-      toast.onChange((_count, containerId) => {
-        expect(containerId).toBe('foo');
+      toast.onChange(toast => {
+        expect(toast.content).toBe('hello');
         done();
       });
+
       act(() => {
         toast('hello');
         jest.runAllTimers();
@@ -198,26 +152,45 @@ describe('toastify', () => {
   });
 
   it('Should be able remove toast programmatically', () => {
-    const { queryByText } = render(<ToastContainer />);
+    render(<ToastContainer />);
     let id: Id;
     act(() => {
       id = toast('hello');
       jest.runAllTimers();
     });
 
-    expect(queryByText('hello')).not.toBe(null);
+    expect(screen.getByText('hello')).not.toBe(null);
 
     act(() => {
       toast.dismiss(id);
       jest.runAllTimers();
     });
 
-    expect(queryByText('hello')).toBe(null);
+    triggerAnimationEnd(screen.getByText('hello'));
+
+    expect(screen.queryByText('hello')).toBe(null);
+  });
+
+  it('Should be able remove toast programmatically without container', () => {
+    let id: Id;
+    act(() => {
+      id = toast('hello');
+      jest.runAllTimers();
+      toast.dismiss(id);
+      jest.runAllTimers();
+    });
+    render(<ToastContainer />);
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(screen.queryByText('hello')).toBe(null);
   });
 
   describe('update function', () => {
     it('Should be able to update an existing toast', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       let id: Id;
 
       act(() => {
@@ -225,7 +198,7 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -234,12 +207,12 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).toBe(null);
-      expect(queryByText('foobar')).not.toBe(null);
+      expect(screen.queryByText('hello')).toBe(null);
+      expect(screen.getByText('foobar')).not.toBe(null);
     });
 
     it('Should be able to update the same toast many times', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       let id: Id;
 
       act(() => {
@@ -247,7 +220,7 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -256,7 +229,7 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('foobar')).not.toBe(null);
+      expect(screen.getByText('foobar')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -265,18 +238,18 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('peace')).not.toBe(null);
+      expect(screen.getByText('peace')).not.toBe(null);
     });
 
     it('Should be able to update a Toast and keep the same content', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       let id: Id;
       act(() => {
         id = toast('hello');
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id, {
@@ -284,17 +257,17 @@ describe('toastify', () => {
         });
         jest.runAllTimers();
       });
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
 
       act(() => {
         toast.update(id);
         jest.runAllTimers();
       });
-      expect(queryByText('hello')).not.toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
     });
 
     it('Should update a toast only if it exist and if the container is mounted', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
 
       act(() => {
         toast.update(0, {
@@ -303,15 +276,11 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).toBe(null);
+      expect(screen.queryByText('hello')).toBe(null);
     });
 
-    /**
-     * This test trigger a warning but it's a false positif
-     *  Warning: Encountered two children with the same key, `.$toast-1`. ...
-     */
     it('Should be able to update the toastId', () => {
-      const { queryByText } = render(<ToastContainer />);
+      render(<ToastContainer />);
       const toastId = 'bar';
       const updateId = 'foo';
 
@@ -322,8 +291,8 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).not.toBe(null);
-      expect(queryByText('foo')).toBe(null);
+      expect(screen.getByText('hello')).not.toBe(null);
+      expect(screen.queryByText('foo')).toBe(null);
       expect(toast.isActive(toastId)).toBe(true);
       expect(toast.isActive(updateId)).toBe(false);
 
@@ -335,8 +304,9 @@ describe('toastify', () => {
         jest.runAllTimers();
       });
 
-      expect(queryByText('hello')).toBe(null);
-      expect(queryByText('foo')).not.toBe(null);
+      expect(screen.queryByText('hello')).toBe(null);
+
+      expect(screen.getByText('foo')).not.toBe(null);
       expect(toast.isActive(toastId)).toBe(false);
       expect(toast.isActive(updateId)).toBe(true);
     });
@@ -380,35 +350,34 @@ describe('toastify', () => {
       expect(toast.isActive(1)).toBe(false);
     });
 
-    it('Should be able to tell if a toast is active based on the id as soon as the container is mounted', done => {
+    it('Should be able to tell if a toast is active based on the id as soon as the container is mounted', () => {
       render(<ToastContainer />);
       let id;
 
       act(() => {
         id = toast('hello');
         jest.runAllTimers();
-        expect(toast.isActive(id)).toBe(true);
-        done();
       });
+
+      expect(toast.isActive(id)).toBe(true);
     });
 
-    it('Should work with multi container', done => {
+    it('Should work with multi container', () => {
       render(
         <>
           <ToastContainer containerId="first" enableMultiContainer />
           <ToastContainer containerId="second" enableMultiContainer />
         </>
       );
-
+      let firstId: string | number, secondId: string | number;
       act(() => {
-        const firstId = toast('hello first', { containerId: 'first' });
-        const secondId = toast('hello second', { containerId: 'second' });
+        firstId = toast('hello first', { containerId: 'first' });
+        secondId = toast('hello second', { containerId: 'second' });
         jest.runAllTimers();
-
-        expect(toast.isActive(firstId)).toBe(true);
-        expect(toast.isActive(secondId)).toBe(true);
-        done();
       });
+
+      expect(toast.isActive(firstId)).toBe(true);
+      expect(toast.isActive(secondId)).toBe(true);
     });
   });
 
@@ -437,7 +406,7 @@ describe('toastify', () => {
       toast.warning('warning');
       toast.info('info');
       toast.warn('warn');
-      toast.dark("dark");
+      toast.dark('dark');
       jest.runAllTimers();
     });
     expect(queryByText('default')).not.toBe(null);
@@ -484,28 +453,29 @@ describe('toastify', () => {
     });
   });
 
-  it("should remove toast even when not collapsing on exit", () => {
+  it('should remove toast even when not collapsing on exit', () => {
     const Transition = cssTransition({
       enter: 'foo',
       exit: 'bar',
-      duration: [300, 500],
       collapse: false
     });
-    
-    const { queryByText } = render(<ToastContainer transition={Transition}/>);
+
+    render(<ToastContainer transition={Transition} />);
     let id: Id;
     act(() => {
       id = toast('hello');
       jest.runAllTimers();
     });
 
-    expect(queryByText('hello')).not.toBe(null);
+    expect(screen.getByText('hello')).not.toBe(null);
 
     act(() => {
       toast.dismiss(id);
       jest.runAllTimers();
     });
 
-    expect(queryByText('hello')).toBe(null);
-  })
+    triggerAnimationEnd(screen.getByText('hello'));
+
+    expect(screen.queryByText('hello')).toBe(null);
+  });
 });

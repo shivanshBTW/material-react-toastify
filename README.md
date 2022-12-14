@@ -43,7 +43,7 @@ $ yarn add material-react-toastify
 - Can choose swipe direction
 - Super easy to use an animation of your choice. Works well with animate.css for example
 - Can display a react component inside the toast!
-- Has `onOpen` and `onClose` hooks. Both can access the props passed to the react component rendered inside the toast
+- Has ```onOpen``` and ```onClose``` hooks. Both can access the props passed to the react component rendered inside the toast
 - Can remove a toast programmatically
 - Define behavior per toast
 - Pause toast when the window loses focus 👁
@@ -83,7 +83,7 @@ function App() {
 </div>
 
 ```js
-toast("It's that easy"); // or toast.default()
+toast("It's that easy");
 toast.success('to create');
 toast.error('different types');
 toast.dark('of notifications.');
