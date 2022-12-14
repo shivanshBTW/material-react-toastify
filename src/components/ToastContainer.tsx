@@ -5,7 +5,7 @@ import cx from 'clsx';
 
 import { Toast } from './Toast';
 import { CloseButton } from './CloseButton';
-import { Bounce, Slide } from './Transitions';
+import { Slide } from './Transitions';
 import { Direction, Default, parseClassName, isFn } from '../utils';
 import { useToastContainer } from '../hooks/useToastContainer';
 import { ToastContainerProps, ToastPosition } from '../types';
@@ -84,7 +84,7 @@ export const ToastContainer = forwardRef<HTMLDivElement, ToastContainerProps>(
 ToastContainer.displayName = 'ToastContainer';
 
 ToastContainer.defaultProps = { 
-  position: POSITION.BOTTOM_LEFT as ToastPosition,
+  position: "bottom-left",
   transition: Slide,
   rtl: false,
   autoClose: 3000,
