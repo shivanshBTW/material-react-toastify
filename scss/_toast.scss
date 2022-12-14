@@ -3,8 +3,8 @@
   min-height: var(--toastify-toast-min-height);
   box-sizing: border-box;
   margin-bottom: 1rem;
-  padding: 8px;
-  border-radius: 4px;
+  padding: var(--toastify-toast-top-bottom-padding) var(--toastify-toast-left-right-padding);
+  border-radius: var(--toastify-toast-border-radius);
   box-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.1), 0 2px 15px 0 rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
@@ -52,7 +52,6 @@
 
 @media #{$rt-mobile} {
   .#{$rt-namespace}__toast {
-    margin-bottom: 0;
-    border-radius: 0;
+    margin: 0 3px 3px;
   }
 }

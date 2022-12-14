@@ -30,8 +30,7 @@ export const TYPE: { [key in KeyOfType]: TypeOptions } = {
   SUCCESS: 'success',
   WARNING: 'warning',
   ERROR: 'error',
-  DEFAULT: 'default',
-  DARK: 'dark'
+  DEFAULT: 'default'
 };
 
 export const enum Type {
@@ -39,8 +38,7 @@ export const enum Type {
   SUCCESS = 'success',
   WARNING = 'warning',
   ERROR = 'error',
-  DEFAULT = 'default',
-  DARK= 'dark'
+  DEFAULT = 'default'
 }
 
 export const enum Default {
