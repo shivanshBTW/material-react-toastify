@@ -7,12 +7,12 @@
 This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastify) v6.1.0, all its props and documentation will work with this module too.
 
 <!--![Financial Contributors on Open Collective](https://opencollective.com/react-toastify/all/badge.svg?label=financial+contributors)](https://opencollective.com/react-toastify)-->
-<!--![material-react-toastify CI](https://github.com/fkhadra/react-toastify/workflows/React-toastify%20CI/badge.svg)--->
+<!--![material-react-toastify CI](https://github.com/shivanshBTW/material-react-toastify/workflows/React-toastify%20CI/badge.svg)--->
 
 ![npm](https://img.shields.io/npm/dm/material-react-toastify.svg?label=%E2%8F%ACdownloads&style=for-the-badge)
 ![npm](https://img.shields.io/npm/v/material-react-toastify.svg?style=for-the-badge)
 ![NPM](https://img.shields.io/npm/l/react-toastify.svg?label=%F0%9F%93%9Clicense&style=for-the-badge)
-![Coveralls github](https://img.shields.io/coveralls/github/fkhadra/react-toastify?label=%E2%9B%B1coverage&style=for-the-badge)
+![Coveralls github](https://img.shields.io/coveralls/github/shivanshBTW/material-react-toastify?label=%E2%9B%B1coverage&style=for-the-badge)
 [![downloads](https://img.shields.io/npm/dt/material-react-toastify.svg?style=for-the-badge)](https://www.npmjs.com/package/material-react-toastify)
 
 <!--![React toastify](https://user-images.githubusercontent.com/5574267/35336500-e58f35b6-0118-11e8-800b-2da6594fc700.gif "React toastify")--->
@@ -101,7 +101,7 @@ Here's the [documentation](https://material-react-toastify.netlify.app/introduct
 
 \*\*I edited the original documentation to change it according to material-react-toastify
 
-You can also check-out the original react-toastify documentation [here](https://fkhadra.github.io/react-toastify/introduction) for further reference.
+You can also check-out the original react-toastify documentation [here](https://shivanshBTW.github.io/react-toastify/introduction) for further reference.
 
 ## Contribute
 

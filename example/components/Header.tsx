@@ -3,7 +3,7 @@ import * as React from 'react';
 export const Header = () => (
   <header>
     <a
-      href="https://github.com/fkhadra/react-toastify"
+      href="https://github.com/shivanshBTW/material-react-toastify"
       className="github-corner"
       aria-label="View source on Github"
     >
@@ -39,7 +39,7 @@ export const Header = () => (
     <h1>Welcome to React-toastify</h1>
     <h5>React notification made easy !</h5>
     <div>
-      <a className="btn" href="https://fkhadra.github.io/react-toastify">
+      <a className="btn" href="https://shivanshBTW.github.io/react-toastify">
         <span role="img" aria-label="link to github">
           📖
         </span>{' '}
@@ -47,7 +47,7 @@ export const Header = () => (
       </a>
       <a
         className="btn"
-        href="https://github.com/fkhadra/react-toastify/stargazers"
+        href="https://github.com/shivanshBTW/material-react-toastify/stargazers"
       >
         <span role="img" aria-label="link to github">
           ⭐️
