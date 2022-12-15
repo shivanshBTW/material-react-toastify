@@ -83,8 +83,8 @@ export const ToastContainer = forwardRef<HTMLDivElement, ToastContainerProps>(
 
 ToastContainer.displayName = 'ToastContainer';
 
-ToastContainer.defaultProps = { 
-  position: "bottom-left",
+ToastContainer.defaultProps = {
+  position: 'bottom-left',
   transition: Slide,
   rtl: false,
   autoClose: 3000,
