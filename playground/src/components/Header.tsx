@@ -36,8 +36,8 @@ export const Header = () => (
         />
       </svg>
     </a>
-    <h1>Welcome to React-toastify</h1>
-    <h5>React notification made easy !</h5>
+    <h1>Welcome to material-react-toastify</h1>
+    <h5>Material UI snackbar notifications made easy!</h5>
     <div>
       <a className="btn" href="https://shivanshBTW.github.io/react-toastify">
         <span role="img" aria-label="link to github">

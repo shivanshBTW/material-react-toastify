@@ -2,9 +2,9 @@
 
 ### You can try the [demo here](https://material-react-toastify.surge.sh).
 
-<h4>🎉 🎉 now updated to v9.1.1 from the original repo 🎉 🎉</h5>
+<h4>🎉 🎉 now updated to v10.0.5 from the original repo 🎉 🎉</h5>
 
-This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastify) v9.1.1, all its props and documentation will work with this module too.
+This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastify) v10.0.5, all its props and documentation will work with this module too.
 
 <!--![Financial Contributors on Open Collective](https://opencollective.com/react-toastify/all/badge.svg?label=financial+contributors)](https://opencollective.com/react-toastify)-->
 <!--![material-react-toastify CI](https://github.com/shivanshBTW/material-react-toastify/workflows/React-toastify%20CI/badge.svg)--->

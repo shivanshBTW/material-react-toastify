@@ -76,4 +76,4 @@ The playground let you test your changes, it's like the demo of react-toastify. 
 This is the glue between `toast` and `ToastContainer`. In fact, it is just a dead simple pubsub.
 
 ## License
-By contributing, you agree that your contributions will be licensed under its [MIT License](https://github.com/fkhadra/react-toastify/blob/main/LICENSE).
+By contributing, you agree that your contributions will be licensed under its [MIT License](https://github.com/shivanshBTW/material-react-toastify/blob/main/LICENSE).
