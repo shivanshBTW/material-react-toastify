@@ -23,7 +23,11 @@ This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastif
   />
 </div>
 
-![stacked](https://github.com/fkhadra/react-toastify/assets/5574267/975c7c01-b95e-43cf-9100-256fa8ef2760)
+<div style="text-align:center; margin-bottom:10px; max-height:100px">
+  <img 
+    src="https://github.com/fkhadra/react-toastify/assets/5574267/975c7c01-b95e-43cf-9100-256fa8ef2760"
+  />
+</div>
 
 
 🎉 material-react-toastify allows you to add notification snackbars to your app with ease. No need to maintain multiple states anymore!
