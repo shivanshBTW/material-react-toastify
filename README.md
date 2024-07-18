@@ -8,6 +8,8 @@ This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastif
 
 <!--![Financial Contributors on Open Collective](https://opencollective.com/react-toastify/all/badge.svg?label=financial+contributors)](https://opencollective.com/react-toastify)-->
 <!--![material-react-toastify CI](https://github.com/shivanshBTW/material-react-toastify/workflows/React-toastify%20CI/badge.svg)--->
+![stacked](https://github.com/fkhadra/react-toastify/assets/5574267/975c7c01-b95e-43cf-9100-256fa8ef2760)
+
 
 ![npm](https://img.shields.io/npm/dm/material-react-toastify.svg?label=downloads&style=for-the-badge)
 ![npm](https://img.shields.io/npm/v/material-react-toastify.svg?style=for-the-badge)
@@ -52,6 +54,8 @@ $ yarn add material-react-toastify
 - You can control the progress bar a la `nprogress` 😲
 - You can limit the number of toast displayed at the same time
 - Dark mode 🌒
+- Pause timer programmaticaly 
+- Stacked notifications!
 - And much more !
 
 ## The gist

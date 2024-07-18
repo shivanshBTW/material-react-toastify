@@ -11,5 +11,8 @@ esm/
 dist/
 .cache
 /addons
+.nyc_output
+cypress/videos/*
+cypress/screenshots/*
 
 /example/.parcel-cache/
