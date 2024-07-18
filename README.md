@@ -110,7 +110,7 @@ Here's the [documentation](https://material-react-toastify.netlify.app/introduct
 
 \*\*I edited the original documentation to change it according to material-react-toastify
 
-You can also check-out the original react-toastify documentation [here](https://shivanshBTW.github.io/react-toastify/introduction) for further reference.
+You can also check-out the original react-toastify documentation [here](https://fkhadra.github.io/react-toastify/introduction) for further reference.
 
 ## Contribute
 
