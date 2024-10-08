@@ -1,4 +1,4 @@
-import { DEFAULT } from './constant';
+import { Default } from './constant';
 
 /**
  * Used to collapse toast after exit animation
@@ -6,21 +6,20 @@ import { DEFAULT } from './constant';
 export function collapseToast(
   node: HTMLElement,
   done: () => void,
-  duration = DEFAULT.COLLAPSE_DURATION
+  duration = Default.COLLAPSE_DURATION
 ) {
-  const height = node.scrollHeight;
-  const style = node.style;
+  const { scrollHeight, style } = node;
 
   requestAnimationFrame(() => {
     style.minHeight = 'initial';
-    style.height = height + 'px';
+    style.height = scrollHeight + 'px';
     style.transition = `all ${duration}ms`;
 
     requestAnimationFrame(() => {
       style.height = '0';
       style.padding = '0';
       style.margin = '0';
-      setTimeout(() => done(), duration as number);
+      setTimeout(done, duration as number);
     });
   });
 }

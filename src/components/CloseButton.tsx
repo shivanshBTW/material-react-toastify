@@ -1,21 +1,22 @@
-import * as React from 'react';
-import { DEFAULT } from '../utils';
-import { TypeOptions } from '../types';
+import React from 'react';
+import { Default } from '../utils';
+import { Theme, TypeOptions } from '../types';
 
 export interface CloseButtonProps {
   closeToast: (e: React.MouseEvent<HTMLElement>) => void;
   type: TypeOptions;
   ariaLabel?: string;
+  theme: Theme;
 }
 
 export function CloseButton({
   closeToast,
-  type,
+  theme,
   ariaLabel = 'close'
 }: CloseButtonProps) {
   return (
     <button
-      className={`${DEFAULT.CSS_NAMESPACE}__close-button ${DEFAULT.CSS_NAMESPACE}__close-button--${type}`}
+      className={`${Default.CSS_NAMESPACE}__close-button ${Default.CSS_NAMESPACE}__close-button--${theme}`}
       type="button"
       onClick={e => {
         e.stopPropagation();

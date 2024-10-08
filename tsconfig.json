@@ -1,9 +1,9 @@
 {
-  "include": ["src", "types", "test"],
+  "include": ["src", "types", "cypress", "@testing-library/cypress"],
   "compilerOptions": {
-    "target": "es5",
-    "module": "esnext",
+    "module": "ESNext",
     "lib": ["dom", "esnext"],
+    "types": ["cypress", "node", "@4tw/cypress-drag-drop"],
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
@@ -20,10 +20,6 @@
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
-    "baseUrl": "./",
-    "paths": {
-      "*": ["src/*", "node_modules/*"]
-    },
     "jsx": "react",
     "esModuleInterop": true
   }

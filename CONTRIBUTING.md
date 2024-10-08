@@ -8,10 +8,11 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ## General Guidelines
 
+- Before starting to work on something, please open an issue first
 - If adding a new feature, write the corresponding test
 - Ensure that nothing get broke. You can use the playground for that
-- If applicable, update the [documentation](https://github.com/fkhadra/react-toastify-doc)
-- Use prettier before commiting 😭
+- If applicable, update the [documentation](https://github.com/shivanshBTW/material-react-toastify-doc)
+- Use prettier before committing 😭
 - When solving a bug, please provide the steps to reproduce it(codesandbox is our best friend for that)
 - Tchill 👌
 
@@ -19,7 +20,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ### Pre-requisites
 
-- *Node:* `^9.0.0`
+- *Node:* `^16.0.0`
 - *Yarn*
 
 ### Install
@@ -27,7 +28,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 Clone the repository and create a local branch:
 
 ```sh
-git clone https://github.com/fkhadra/react-toastify.git
+git clone https://github.com/shivanshBTW/material-react-toastify.git
 cd react-toastify
 
 git checkout -b my-branch
@@ -36,7 +37,9 @@ git checkout -b my-branch
 Install dependencies:
 
 ```sh
-yarn install
+yarn install 
+// then
+yarn setup
 ```
 
 ## Developing
@@ -52,7 +55,7 @@ yarn start
 yarn test
 
 # Prettify all the things
-yarn prettier-all
+yarn prettier
 ```
 
 ### Project structure
@@ -67,10 +70,10 @@ The playground let you test your changes, it's like the demo of react-toastify. 
 
 #### Src
 
-- [toast:](https://github.com/fkhadra/react-toastify/blob/master/src/core/toast.tsx) Contain the exposed api (`toast.success...`).
+- [toast:](https://github.com/shivanshBTW/material-react-toastify/blob/master/src/core/toast.ts) Contain the exposed api (`toast.success...`).
 
-- [eventManager:](https://github.com/fkhadra/react-toastify/blob/master/src/core/eventManager.ts) 
+- [eventManager:](https://github.com/shivanshBTW/material-react-toastify/blob/master/src/core/eventManager.ts) 
 This is the glue between `toast` and `ToastContainer`. In fact, it is just a dead simple pubsub.
 
 ## License
-By contributing, you agree that your contributions will be licensed under its MIT License.
+By contributing, you agree that your contributions will be licensed under its [MIT License](https://github.com/shivanshBTW/material-react-toastify/blob/main/LICENSE).

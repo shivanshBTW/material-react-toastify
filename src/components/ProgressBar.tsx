@@ -1,8 +1,8 @@
-import * as React from 'react';
+import React from 'react';
 import cx from 'clsx';
 
-import { TYPE, DEFAULT, isFn } from './../utils';
-import { TypeOptions, ToastClassName } from '../types';
+import { Default, isFn, Type } from './../utils';
+import { TypeOptions, ToastClassName, Theme } from '../types';
 
 export interface ProgressBarProps {
   /**
@@ -23,7 +23,12 @@ export interface ProgressBarProps {
   /**
    * Optional type : info, success ...
    */
-  type: TypeOptions;
+  type?: TypeOptions;
+
+  /**
+   * The theme that is currently used
+   */
+  theme: Theme;
 
   /**
    * Hide or not the progress bar
@@ -31,12 +36,12 @@ export interface ProgressBarProps {
   hide?: boolean;
 
   /**
-   * Optionnal className
+   * Optional className
    */
   className?: ToastClassName;
 
   /**
-   * Optionnal inline style
+   * Optional inline style
    */
   style?: React.CSSProperties;
 
@@ -65,59 +70,75 @@ export function ProgressBar({
   delay,
   isRunning,
   closeToast,
-  type,
+  type = Type.DEFAULT,
   hide,
   className,
   style: userStyle,
   controlledProgress,
   progress,
   rtl,
-  isIn
+  isIn,
+  theme
 }: ProgressBarProps) {
+  const isHidden = hide || (controlledProgress && progress === 0);
   const style: React.CSSProperties = {
     ...userStyle,
     animationDuration: `${delay}ms`,
-    animationPlayState: isRunning ? 'running' : 'paused',
-    opacity: hide ? 0 : 1
+    animationPlayState: isRunning ? 'running' : 'paused'
   };
 
   if (controlledProgress) style.transform = `scaleX(${progress})`;
-  const defaultClassArr = [
-    `${DEFAULT.CSS_NAMESPACE}__progress-bar`,
+  const defaultClassName = cx(
+    `${Default.CSS_NAMESPACE}__progress-bar`,
     controlledProgress
-      ? `${DEFAULT.CSS_NAMESPACE}__progress-bar--controlled`
-      : `${DEFAULT.CSS_NAMESPACE}__progress-bar--animated`,
-    `${DEFAULT.CSS_NAMESPACE}__progress-bar--${type}`,
+      ? `${Default.CSS_NAMESPACE}__progress-bar--controlled`
+      : `${Default.CSS_NAMESPACE}__progress-bar--animated`,
+    `${Default.CSS_NAMESPACE}__progress-bar-theme--${theme}`,
+    `${Default.CSS_NAMESPACE}__progress-bar--${type}`,
     {
-      [`${DEFAULT.CSS_NAMESPACE}__progress-bar--rtl`]: rtl
+      [`${Default.CSS_NAMESPACE}__progress-bar--rtl`]: rtl
     }
-  ];
+  );
   const classNames = isFn(className)
     ? className({
         rtl,
         type,
-        defaultClassName: cx(...defaultClassArr)
+        defaultClassName
       })
-    : cx(...[...defaultClassArr, className]);
+    : cx(defaultClassName, className);
 
   // 🧐 controlledProgress is derived from progress
   // so if controlledProgress is set
   // it means that this is also the case for progress
   const animationEvent = {
-    [controlledProgress && progress! >= 1
+    [controlledProgress && (progress as number)! >= 1
       ? 'onTransitionEnd'
       : 'onAnimationEnd']:
-      controlledProgress && progress! < 1
+      controlledProgress && (progress as number)! < 1
         ? null
         : () => {
             isIn && closeToast();
           }
   };
 
-  return <div className={classNames} style={style} {...animationEvent} />;
-}
+  // TODO: add aria-valuenow, aria-valuemax, aria-valuemin
 
-ProgressBar.defaultProps = {
-  type: TYPE.DEFAULT,
-  hide: false
-};
+  return (
+    <div
+      className={`${Default.CSS_NAMESPACE}__progress-bar--wrp`}
+      data-hidden={isHidden}
+    >
+      <div
+        className={`${Default.CSS_NAMESPACE}__progress-bar--bg ${Default.CSS_NAMESPACE}__progress-bar-theme--${theme} ${Default.CSS_NAMESPACE}__progress-bar--${type}`}
+      />
+      <div
+        role="progressbar"
+        aria-hidden={isHidden ? 'true' : 'false'}
+        aria-label="notification timer"
+        className={classNames}
+        style={style}
+        {...animationEvent}
+      />
+    </div>
+  );
+}

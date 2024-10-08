@@ -1,9 +1,9 @@
-import * as React from 'react';
-import { Transition } from 'react-transition-group';
-import { ToastTransitionProps } from '../types';
-
+// @ts-nocheck
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { collapseToast } from './collapseToast';
-import { DEFAULT } from './constant';
+import { Default } from './constant';
+
+import { ToastTransitionProps } from '../types';
 
 export interface CSSTransitionProps {
   /**
@@ -17,21 +17,15 @@ export interface CSSTransitionProps {
   exit: string;
 
   /**
-   * Define the duration of the transition in ms
-   * You can also pass an array `[enterDuration, exitDuration]`
-   * `Default: 750`
-   */
-  duration?: number | [number, number];
-
-  /**
    * Append current toast position to the classname.
+   * If multiple classes are provided, only the last one will get the position
    * For instance `myclass--top-center`...
    * `Default: false`
    */
   appendPosition?: boolean;
 
   /**
-   * Collapse toast smoothly when animation end
+   * Collapse toast smoothly when exit animation end
    * `Default: true`
    */
   collapse?: boolean;
@@ -43,90 +37,88 @@ export interface CSSTransitionProps {
   collapseDuration?: number;
 }
 
+const enum AnimationStep {
+  Enter,
+  Exit
+}
+
+/**
+ * Css animation that just work.
+ * You could use animate.css for instance
+ *
+ *
+ * ```
+ * cssTransition({
+ *   enter: "animate__animated animate__bounceIn",
+ *   exit: "animate__animated animate__bounceOut"
+ * })
+ * ```
+ *
+ */
 export function cssTransition({
   enter,
   exit,
-  duration = 750,
   appendPosition = false,
   collapse = true,
-  collapseDuration = DEFAULT.COLLAPSE_DURATION
+  collapseDuration = Default.COLLAPSE_DURATION
 }: CSSTransitionProps) {
-  let enterDuration: number, exitDuration: number;
-
-  if (Array.isArray(duration) && duration.length === 2) {
-    [enterDuration, exitDuration] = duration;
-  } else {
-    enterDuration = exitDuration = duration as number;
-  }
-
   return function ToastTransition({
     children,
     position,
     preventExitTransition,
     done,
-    ...props
+    nodeRef,
+    isIn,
+    playToast
   }: ToastTransitionProps) {
     const enterClassName = appendPosition ? `${enter}--${position}` : enter;
     const exitClassName = appendPosition ? `${exit}--${position}` : exit;
+    const animationStep = useRef(AnimationStep.Enter);
 
-    const onEnter = () => {
-      const node = props.nodeRef.current;
-      if (node) {
-        node.classList.add(enterClassName);
-        node.style.animationFillMode = 'forwards';
-        node.style.animationDuration = `${enterDuration}ms`;
-      }
-    };
+    useLayoutEffect(() => {
+      const node = nodeRef.current!;
+      const classToToken = enterClassName.split(' ');
 
-    const onEntered = () => {
-      const node = props.nodeRef.current;
-      if (node) {
-        node.classList.remove(enterClassName);
-        node.style.cssText = '';
-      }
-    };
+      const onEntered = (e: AnimationEvent) => {
+        if (e.target !== nodeRef.current) return;
 
-    const onExited = () => {
-      const node = props.nodeRef.current;
+        playToast();
+        node.removeEventListener('animationend', onEntered);
+        node.removeEventListener('animationcancel', onEntered);
+        if (
+          animationStep.current === AnimationStep.Enter &&
+          e.type !== 'animationcancel'
+        ) {
+          node.classList.remove(...classToToken);
+        }
+      };
 
-      if (node) {
+      const onEnter = () => {
+        node.classList.add(...classToToken);
+        node.addEventListener('animationend', onEntered);
+        node.addEventListener('animationcancel', onEntered);
+      };
+
+      onEnter();
+    }, []);
+
+    useEffect(() => {
+      const node = nodeRef.current!;
+
+      const onExited = () => {
         node.removeEventListener('animationend', onExited);
         collapse ? collapseToast(node, done, collapseDuration) : done();
-      }
-    };
+      };
 
-    const onExit = () => {
-      const node = props.nodeRef.current;
-      if (node) {
-        node.classList.add(exitClassName);
-        node.style.animationFillMode = 'forwards';
-        node.style.animationDuration = `${exitDuration}ms`;
+      const onExit = () => {
+        animationStep.current = AnimationStep.Exit;
+        node.className += ` ${exitClassName}`;
         node.addEventListener('animationend', onExited);
-      }
-    };
+      };
 
-    return (
-      <Transition
-        {...props}
-        timeout={
-          preventExitTransition
-            ? collapse
-              ? collapseDuration
-              : DEFAULT.DEBOUNCE_DURATION
-            : {
-                enter: enterDuration,
-                exit: collapse
-                  ? exitDuration + collapseDuration
-                  : exitDuration + DEFAULT.DEBOUNCE_DURATION
-              }
-        }
-        onEnter={onEnter}
-        onEntered={onEntered}
-        onExit={preventExitTransition ? onExited : onExit}
-        unmountOnExit
-      >
-        {children}
-      </Transition>
-    );
+      if (!isIn) preventExitTransition ? onExited() : onExit();
+    }, [isIn]);
+
+    return <>{children}</>;
   };
 }

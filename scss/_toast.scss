@@ -1,56 +1,115 @@
 .#{$rt-namespace}__toast {
-    min-height: $rt-toast-min-height;
-    max-height: $rt-toast-max-height;
-    padding: $rt-toast-top-bottom-padding $rt-toast-left-right-padding;
-    border-radius: $rt-toast-border-radius;
-    font-family: $rt-font-family;
-    font-size: $rt-font-size;
-    line-height: $rt-line-height;
+  --y: 0;
+  position: relative;
+  touch-action: none;
+  min-height: var(--toastify-toast-min-height);
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: var(--toastify-toast-top-bottom-padding) var(--toastify-toast-left-right-padding);
+  border-radius: var(--toastify-toast-border-radius);
+  box-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.1), 0 2px 15px 0 rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  max-height: var(--toastify-toast-max-height);
+  font-family: var(--toastify-font-family);
+  cursor: default;
+  direction: ltr;
+  /* webkit only issue #791 */
+  z-index: 0;
+  overflow: hidden;
+  
+  &--stacked {
+    position: absolute;
+    width: 100%;
+    transform: translate3d(0, var(--y), 0) scale(var(--s));
+    transition: transform 0.3s;
 
-    position: relative;
-    box-sizing: border-box;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 10px 0 rgba(0, 0, 0, .1), 0 2px 15px 0 rgba(0, 0, 0, .05);
-    display: flex;
-    justify-content: space-between;
-    overflow: hidden;
+    &[data-collapsed] .#{$rt-namespace}__toast-body, &[data-collapsed] .#{$rt-namespace}__close-button  {
+      transition: opacity 0.1s;
+    }
+
+    &[data-collapsed="false"]{
+      overflow: visible;
+    }
+
+    &[data-collapsed="true"]:not(:last-child) > * {
+      opacity: 0;
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: calc(var(--g) * 1px);
+      bottom: 100%;
+    }
+
+    &[data-pos="top"] {
+      top: 0;
+    }
+
+    &[data-pos="bot"]  {
+      bottom: 0;
+    }
+
+    &[data-pos="bot"]#{&}:before {
+      transform-origin: top;
+    }
+
+    &[data-pos="top"]#{&}:before {
+      transform-origin: bottom;
+    }
+
+    &:before{
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 100%;
+      transform: scaleY(3);
+      z-index: -1;
+    }
+  }
+  
+  &--rtl {
+    direction: rtl;
+  }
+  &--close-on-click {
     cursor: pointer;
-    direction: ltr;
-    &--rtl {
-        direction: rtl;
+  }
+  &-body {
+    margin: auto 0;
+    flex: 1 1 auto;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    & > div:last-child {
+      word-break: break-word;
+      flex: 1;
     }
-    &--dark {
-        background: $rt-color-dark;
-        color: $rt-text-color-dark;
-    }
-    &--default {
-        background: $rt-color-default;
-        color: $rt-text-color-default;
-    }
-    &--info {
-        background: $rt-color-info;
-        color: $rt-text-color-info;
-    }
-    &--success {
-        background: $rt-color-success;
-        color: $rt-text-color-success;
-    }
-    &--warning {
-        background: $rt-color-warning;
-        color: $rt-text-color-warning;
-    }
-    &--error {
-        background: $rt-color-error;
-        color: $rt-text-color-error;
-    }
-    &-body {
-        margin: auto 0;
-        flex: 1 1 auto;
-    }
+  }
+  &-icon {
+    margin-inline-end: 10px;
+    width: 20px;
+    flex-shrink: 0;
+    display: flex;
+  }
+}
+
+.#{$rt-namespace}--animate {
+  animation-fill-mode: both;
+  animation-duration: 0.5s;
+}
+
+.#{$rt-namespace}--animate-icon {
+  animation-fill-mode: both;
+  animation-duration: 0.3s;
 }
 
 @media #{$rt-mobile} {
-  .#{$rt-namespace}__toast{
-    margin-bottom: 0;  
+  .#{$rt-namespace}__toast {
+    margin: 0 3px 3px;
   }
 }

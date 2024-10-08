@@ -2,18 +2,18 @@
 
 ### You can try the [demo here](https://material-react-toastify.surge.sh).
 
-<h4>v1 is out 🎉 🎉</h5>
+<h4>🎉 🎉 now updated to v10.0.5 from the original repo 🎉 🎉</h5>
 
-This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastify) v6.1.0, all its props and documentation will work with this module too.
+This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastify) v10.0.5, all its props and documentation will work with this module too.
 
 <!--![Financial Contributors on Open Collective](https://opencollective.com/react-toastify/all/badge.svg?label=financial+contributors)](https://opencollective.com/react-toastify)-->
-<!--![material-react-toastify CI](https://github.com/fkhadra/react-toastify/workflows/React-toastify%20CI/badge.svg)--->
+<!--![material-react-toastify CI](https://github.com/shivanshBTW/material-react-toastify/workflows/React-toastify%20CI/badge.svg)--->
 
-![npm](https://img.shields.io/npm/dm/material-react-toastify.svg?label=%E2%8F%ACdownloads&style=for-the-badge)
+![npm](https://img.shields.io/npm/dm/material-react-toastify.svg?label=downloads&style=for-the-badge)
 ![npm](https://img.shields.io/npm/v/material-react-toastify.svg?style=for-the-badge)
-![NPM](https://img.shields.io/npm/l/react-toastify.svg?label=%F0%9F%93%9Clicense&style=for-the-badge)
-![Coveralls github](https://img.shields.io/coveralls/github/fkhadra/react-toastify?label=%E2%9B%B1coverage&style=for-the-badge)
-[![downloads](https://img.shields.io/npm/dt/material-react-toastify.svg?style=for-the-badge)](https://www.npmjs.com/package/material-react-toastify)
+![NPM](https://img.shields.io/npm/l/material-react-toastify.svg?label=license&style=for-the-badge)
+<!-- ![Coveralls github](https://img.shields.io/coveralls/github/shivanshBTW/material-react-toastify?label=coverage&style=for-the-badge) -->
+[![downloads](https://img.shields.io/npm/dt/material-react-toastify.svg?style=for-the-badge&label=overall%20downloads)](https://www.npmjs.com/package/material-react-toastify)
 
 <!--![React toastify](https://user-images.githubusercontent.com/5574267/35336500-e58f35b6-0118-11e8-800b-2da6594fc700.gif "React toastify")--->
 
@@ -22,6 +22,13 @@ This is a fork from [react-toastify](https://www.npmjs.com/package/react-toastif
     src="https://user-images.githubusercontent.com/35040146/100596753-851b5e00-3322-11eb-9073-1a50e5adcb53.png"
   />
 </div>
+
+<!-- <div style="text-align:center; margin-bottom:10px; max-height:100px">
+  <img 
+    src="https://github.com/fkhadra/react-toastify/assets/5574267/975c7c01-b95e-43cf-9100-256fa8ef2760"
+  />
+</div> -->
+
 
 🎉 material-react-toastify allows you to add notification snackbars to your app with ease. No need to maintain multiple states anymore!
 
@@ -43,7 +50,7 @@ $ yarn add material-react-toastify
 - Can choose swipe direction
 - Super easy to use an animation of your choice. Works well with animate.css for example
 - Can display a react component inside the toast!
-- Has `onOpen` and `onClose` hooks. Both can access the props passed to the react component rendered inside the toast
+- Has ```onOpen``` and ```onClose``` hooks. Both can access the props passed to the react component rendered inside the toast
 - Can remove a toast programmatically
 - Define behavior per toast
 - Pause toast when the window loses focus 👁
@@ -52,6 +59,8 @@ $ yarn add material-react-toastify
 - You can control the progress bar a la `nprogress` 😲
 - You can limit the number of toast displayed at the same time
 - Dark mode 🌒
+- Pause timer programmaticaly 
+- Stacked notifications!
 - And much more !
 
 ## The gist
@@ -83,7 +92,7 @@ function App() {
 </div>
 
 ```js
-toast("It's that easy"); // or toast.default()
+toast("It's that easy");
 toast.success('to create');
 toast.error('different types');
 toast.dark('of notifications.');
@@ -115,7 +124,8 @@ You can also find me on [reactiflux](https://www.reactiflux.com/). My pseudo is 
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
 <a href="https://github.com/shivanshBTW/material-react-toastify/graphs/contributors">
-    <img src="https://opencollective.com/react-toastify/contributors.svg?width=890&button=false" />
+    [Find all the contributors]
+    <!-- <img src="https://opencollective.com/react-toastify/contributors.svg?width=890&button=false" /> -->
 </a>
 
 <!--### Financial Contributors

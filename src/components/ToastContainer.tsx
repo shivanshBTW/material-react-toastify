@@ -1,130 +1,141 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
 import cx from 'clsx';
+import React, { useRef, useState } from 'react';
 
-import { Toast } from './Toast';
-import { CloseButton } from './CloseButton';
-import { Slide } from './Transitions';
-import {
-  POSITION,
-  DEFAULT,
-  parseClassName,
-  objectValues,
-  isFn
-} from '../utils';
-import { useToastContainer } from '../hooks';
+import { toast } from '../core';
+import { useToastContainer } from '../hooks/useToastContainer';
+import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
 import { ToastContainerProps, ToastPosition } from '../types';
-import { ToastPositioner } from './ToastPositioner';
+import { Default, Direction, isFn, parseClassName } from '../utils';
+import { Toast } from './Toast';
+import { Slide } from './Transitions';
 
-export const ToastContainer: React.FC<ToastContainerProps> = props => {
-  const { getToastToRender, containerRef, isToastActive } = useToastContainer(
-    props
-  );
-  const { className, style, rtl, containerId } = props;
-
-  return (
-    <div
-      ref={containerRef}
-      className={DEFAULT.CSS_NAMESPACE as string}
-      id={containerId as string}
-    >
-      {getToastToRender((position, toastList) => {
-        const swag = {
-          className: isFn(className)
-            ? className({
-                position,
-                rtl,
-                defaultClassName: cx(
-                  `${DEFAULT.CSS_NAMESPACE}__toast-container`,
-                  `${DEFAULT.CSS_NAMESPACE}__toast-container--${position}`,
-                  { [`${DEFAULT.CSS_NAMESPACE}__toast-container--rtl`]: rtl }
-                )
-              })
-            : cx(
-                `${DEFAULT.CSS_NAMESPACE}__toast-container`,
-                `${DEFAULT.CSS_NAMESPACE}__toast-container--${position}`,
-                { [`${DEFAULT.CSS_NAMESPACE}__toast-container--rtl`]: rtl },
-                parseClassName(className)
-              ),
-          style:
-            toastList.length === 0
-              ? { ...style, pointerEvents: 'none' }
-              : { ...style }
-        } as any;
-        return (
-          <ToastPositioner {...swag} key={`container-${position}`}>
-            {toastList.map(({ content, props: toastProps }) => {
-              return (
-                <Toast
-                  {...toastProps}
-                  in={isToastActive(toastProps.toastId)}
-                  key={`toast-${toastProps.key}`}
-                  closeButton={
-                    toastProps.closeButton === true
-                      ? CloseButton
-                      : toastProps.closeButton
-                  }
-                >
-                  {content}
-                </Toast>
-              );
-            })}
-          </ToastPositioner>
-        );
-      })}
-    </div>
-  );
-};
-
-if (process.env.NODE_ENV !== 'production') {
-  // @ts-ignore
-  ToastContainer.propTypes = {
-    // @ts-ignore
-    position: PropTypes.oneOf(objectValues(POSITION)),
-
-    // @ts-ignore
-    autoClose: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
-
-    // @ts-ignore
-    closeButton: PropTypes.oneOfType([
-      PropTypes.node,
-      PropTypes.bool,
-      PropTypes.func
-    ]),
-    hideProgressBar: PropTypes.bool,
-    pauseOnHover: PropTypes.bool,
-    closeOnClick: PropTypes.bool,
-    newestOnTop: PropTypes.bool,
-    className: PropTypes.any, //oneOfType([PropTypes.func, PropTypes.string]),
-    style: PropTypes.object,
-    toastClassName: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    bodyClassName: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    progressClassName: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
-    progressStyle: PropTypes.object,
-    transition: PropTypes.func,
-    rtl: PropTypes.bool,
-    draggable: PropTypes.bool,
-    draggablePercent: PropTypes.number,
-    pauseOnFocusLoss: PropTypes.bool,
-    enableMultiContainer: PropTypes.bool,
-    containerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    role: PropTypes.string,
-    onClick: PropTypes.func
-  };
-}
-
-ToastContainer.defaultProps = {
-  position: POSITION.BOTTOM_LEFT as ToastPosition,
+export const defaultProps: ToastContainerProps = {
+  position: 'bottom-left',
   transition: Slide,
   rtl: false,
   autoClose: 3000,
   hideProgressBar: true,
-  closeButton: CloseButton,
+  closeButton: true,
   pauseOnHover: true,
   pauseOnFocusLoss: true,
   closeOnClick: true,
   newestOnTop: false,
   draggable: true,
-  draggablePercent: 40,
-  role: 'alert'
+  draggablePercent: Default.DRAGGABLE_PERCENT as number,
+  draggableDirection: Direction.X,
+  role: 'alert',
+  theme: 'light'
 };
+
+export function ToastContainer(props: ToastContainerProps) {
+  let containerProps: ToastContainerProps = {
+    ...defaultProps,
+    ...props
+  };
+  const stacked = props.stacked;
+  const [collapsed, setIsCollapsed] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { getToastToRender, isToastActive, count } =
+    useToastContainer(containerProps);
+  const { className, style, rtl, containerId } = containerProps;
+
+  function getClassName(position: ToastPosition) {
+    const defaultClassName = cx(
+      `${Default.CSS_NAMESPACE}__toast-container`,
+      `${Default.CSS_NAMESPACE}__toast-container--${position}`,
+      { [`${Default.CSS_NAMESPACE}__toast-container--rtl`]: rtl }
+    );
+    return isFn(className)
+      ? className({
+          position,
+          rtl,
+          defaultClassName
+        })
+      : cx(defaultClassName, parseClassName(className));
+  }
+
+  function collapseAll() {
+    if (stacked) {
+      setIsCollapsed(true);
+      toast.play();
+    }
+  }
+
+  useIsomorphicLayoutEffect(() => {
+    if (stacked) {
+      const nodes = containerRef.current!.querySelectorAll('[data-in="true"]');
+      const gap = 12;
+      const isTop = containerProps.position?.includes('top');
+      let usedHeight = 0;
+      let prevS = 0;
+
+      Array.from(nodes)
+        .reverse()
+        .forEach((n, i) => {
+          const node = n as HTMLElement;
+          node.classList.add(`${Default.CSS_NAMESPACE}__toast--stacked`);
+
+          if (i > 0) node.dataset.collapsed = `${collapsed}`;
+
+          if (!node.dataset.pos) node.dataset.pos = isTop ? 'top' : 'bot';
+
+          const y =
+            usedHeight * (collapsed ? 0.2 : 1) + (collapsed ? 0 : gap * i);
+
+          node.style.setProperty('--y', `${isTop ? y : y * -1}px`);
+          node.style.setProperty('--g', `${gap}`);
+          node.style.setProperty('--s', `${1 - (collapsed ? prevS : 0)}`);
+
+          usedHeight += node.offsetHeight;
+          prevS += 0.025;
+        });
+    }
+  }, [collapsed, count, stacked]);
+
+  return (
+    <div
+      ref={containerRef}
+      className={Default.CSS_NAMESPACE as string}
+      id={containerId as string}
+      onMouseEnter={() => {
+        if (stacked) {
+          setIsCollapsed(false);
+          toast.pause();
+        }
+      }}
+      onMouseLeave={collapseAll}
+    >
+      {getToastToRender((position, toastList) => {
+        const containerStyle: React.CSSProperties = !toastList.length
+          ? { ...style, pointerEvents: 'none' }
+          : { ...style };
+
+        return (
+          <div
+            className={getClassName(position)}
+            style={containerStyle}
+            key={`container-${position}`}
+          >
+            {toastList.map(({ content, props: toastProps }) => {
+              return (
+                <Toast
+                  {...toastProps}
+                  stacked={stacked}
+                  collapseAll={collapseAll}
+                  isIn={isToastActive(
+                    toastProps.toastId,
+                    toastProps.containerId
+                  )}
+                  style={toastProps.style}
+                  key={`toast-${toastProps.key}`}
+                >
+                  {content}
+                </Toast>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

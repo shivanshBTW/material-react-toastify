@@ -1,45 +1,59 @@
-$rt-namespace: 'Toastify';
-$rt-toast-width: 344px !default;
-$rt-toast-background: #fff !default;
-$rt-toast-min-height: 48px !default;
-$rt-toast-max-height: 800px !default;
-$rt-toast-border-radius: 8px !default;
-$rt-toast-left-right-padding: 16px !default;
-$rt-toast-top-bottom-padding: 6px !default;
-
-$rt-color-default: #fafafa !default;
-$rt-color-dark: #323232 !default;
-$rt-color-info: #2196f3 !default;
-$rt-color-success: #4caf50 !default;
-$rt-color-warning: #ff9800 !default;
-$rt-color-error: #f44336 !default;
-
-//$rt-color-default: #323232 !default;
-//$rt-color-dark: #323232 !default;
-//$rt-color-info: #323232 !default;
-//$rt-color-success: #323232 !default;
-//$rt-color-warning: #323232 !default;
-//$rt-color-error: #323232 !default;
-
-$rt-text-color-default: #aaa !default;
-$rt-text-color-dark: #fff !default;
-$rt-text-color-info: #fff !default;
-$rt-text-color-success: #fff !default;
-$rt-text-color-warning: #fff !default;
-$rt-text-color-error: #fff !default;
-
-$rt-close-button-color-default: #aaa !default;
-$rt-close-button-color-dark: #fff !default;
-$rt-close-button-color-info: #fff !default;
-$rt-close-button-color-success: #fff !default;
-$rt-close-button-color-warning: #fff !default;
-$rt-close-button-color-error: #fff !default;
-
-$rt-color-progress-default: linear-gradient(to right, #4cd964, #5ac8fa, #007aff, #34aadc, #5856d6, #ff2d55) !default;
-$rt-color-progress-dark: #bb86fc !default;
+$rt-namespace: "Toastify";
 $rt-mobile: "only screen and (max-width : 480px)" !default;
-$rt-font-family: Roboto, Helvetica, Arial, sans-serif !default;
-$rt-font-size: 0.875rem !default;
-$rt-line-height: 14px !default;
-$rt-z-index: 9999 !default;
 
+:root {
+  --toastify-color-light: #fafafa;
+  --toastify-color-dark: #121212;
+  --toastify-color-info: #2196f3;
+  --toastify-color-success: #4caf50;
+  --toastify-color-warning: #ff9800;
+  --toastify-color-error: #f44336;
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+
+  --toastify-toast-width: 344px;
+  --toastify-toast-background: #fff;
+  --toastify-toast-min-height: 48px;
+  --toastify-toast-max-height: 800px;
+  --toastify-toast-border-radius: 8px;
+  --toastify-toast-left-right-padding: 16px;
+  --toastify-toast-top-bottom-padding: 6px;
+  --toastify-font-family: Roboto, Helvetica, Arial, sans-serif;
+  --toastify-font-size: 0.875rem;
+  --toastify-line-height: 14px;
+  --toastify-z-index: 9999;
+
+  --toastify-toast-offset: 16px;
+  --toastify-toast-top: max(var(--toastify-toast-offset), env(safe-area-inset-top));
+  --toastify-toast-right: max(var(--toastify-toast-offset), env(safe-area-inset-right));
+  --toastify-toast-left: max(var(--toastify-toast-offset), env(safe-area-inset-left));
+  --toastify-toast-bottom: max(var(--toastify-toast-offset), env(safe-area-inset-bottom));
+  --toastify-toast-max-height: 800px;
+  --toastify-toast-bd-radius: 6px;
+
+  --toastify-text-color-light: #aaa;
+  --toastify-text-color-dark: #fff;
+
+  //Used only for colored theme
+  --toastify-text-color-info: #fff;
+  --toastify-text-color-success: #fff;
+  --toastify-text-color-warning: #fff;
+  --toastify-text-color-error: #fff;
+
+  --toastify-spinner-color: #616161;
+  --toastify-spinner-color-empty-area: #e0e0e0;
+
+  // Used when no type is provided
+  --toastify-color-progress-light: linear-gradient(to right, #4cd964, #5ac8fa, #007aff, #34aadc, #5856d6, #ff2d55);
+  // Used when no type is provided
+  --toastify-color-progress-dark: #bb86fc;
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+  --toastify-color-progress-bgo: 0.2;
+}
